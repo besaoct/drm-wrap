@@ -4,27 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DRM-Wrap License Generator</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230b0f19'/%3E%3Cpath d='M256 96L128 152V256C128 340 184 416 256 440C328 416 384 340 384 256V152L256 96Z' fill='%232563eb'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23000000'/%3E%3Cpath d='M256 96L128 152V256C128 340 184 416 256 440C328 416 384 340 384 256V152L256 96Z' fill='%23ffffff'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #111827;
-      --card-border: #1f2937;
-      --card-alt: #0d131f;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --success: #16a34a;
-      --success-hover: #15803d;
-      --text: #f9fafb;
-      --text-muted: #9ca3af;
-      --text-subtle: #6b7280;
-      --input-bg: #0b0f19;
-      --input-border: #374151;
-      --input-focus: #2563eb;
-      --radius: 6px;
+      --bg: #000000;
+      --card-bg: #000000;
+      --card-border: #262626;
+      --card-alt: #0a0a0a;
+      --primary: #ffffff;
+      --primary-hover: #e5e5e5;
+      --primary-text: #000000;
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.75);
+      --text-subtle: rgba(255, 255, 255, 0.45);
+      --input-bg: #000000;
+      --input-border: #262626;
+      --input-focus: #ffffff;
+      --radius: 4px;
       --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --mono: 'JetBrains Mono', monospace;
     }
@@ -69,21 +68,22 @@
     }
 
     .card-header h1 {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--text);
       letter-spacing: -0.01em;
+      text-transform: uppercase;
     }
 
     .card-header p {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
     .tabs {
       display: flex;
-      background: var(--card-alt);
+      background: var(--card-bg);
       border-bottom: 1px solid var(--card-border);
       padding: 0 16px;
       gap: 4px;
@@ -92,7 +92,7 @@
     .tab-btn {
       background: transparent;
       border: none;
-      color: var(--text-muted);
+      color: var(--text-subtle);
       padding: 12px 14px;
       font-size: 13px;
       font-weight: 600;
@@ -103,11 +103,11 @@
 
     .tab-btn.active {
       color: #ffffff;
-      border-bottom: 2px solid var(--primary);
+      border-bottom: 2px solid #ffffff;
     }
 
     .tab-btn:hover:not(.active) {
-      color: var(--text);
+      color: #ffffff;
     }
 
     .card-body {
@@ -133,7 +133,7 @@
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       color: var(--text-muted);
     }
 
@@ -154,12 +154,12 @@
       border-color: var(--input-focus);
     }
 
-    /* Custom Chevron Down for Select */
+    /* Custom Chevron Down for Select in Pure Black & White */
     select {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: calc(100% - 12px) center;
       background-size: 12px 12px;
@@ -167,8 +167,9 @@
       cursor: pointer;
     }
 
-    select:focus {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    select option {
+      background: #000000;
+      color: #ffffff;
     }
 
     textarea {
@@ -194,8 +195,8 @@
     .btn {
       font-family: var(--font);
       background: var(--primary);
-      color: #ffffff;
-      border: 1px solid transparent;
+      color: var(--primary-text);
+      border: 1px solid #ffffff;
       padding: 10px 16px;
       border-radius: var(--radius);
       font-size: 13px;
@@ -205,7 +206,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: background 0.15s ease;
+      transition: all 0.15s ease;
     }
 
     .btn:hover {
@@ -213,22 +214,25 @@
     }
 
     .btn-secondary {
-      background: #1f2937;
-      border: 1px solid var(--input-border);
-      color: var(--text);
-    }
-
-    .btn-secondary:hover {
-      background: #374151;
-    }
-
-    .btn-success {
-      background: var(--success);
+      background: #000000;
+      border: 1px solid var(--card-border);
       color: #ffffff;
     }
 
-    .btn-success:hover {
-      background: var(--success-hover);
+    .btn-secondary:hover {
+      background: #111111;
+      border-color: #ffffff;
+    }
+
+    .btn-outline {
+      background: #000000;
+      border: 1px solid #ffffff;
+      color: #ffffff;
+    }
+
+    .btn-outline:hover {
+      background: #ffffff;
+      color: #000000;
     }
 
     .btn-sm {
@@ -237,7 +241,7 @@
     }
 
     .result-card {
-      background: var(--card-alt);
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
       padding: 16px;
@@ -251,7 +255,7 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
       font-size: 12px;
-      background: var(--input-bg);
+      background: #000000;
       border: 1px solid var(--card-border);
       padding: 12px;
       border-radius: var(--radius);
@@ -268,10 +272,11 @@
       font-size: 10px;
       text-transform: uppercase;
       font-weight: 600;
+      letter-spacing: 0.05em;
     }
 
     .summary-item span:last-child {
-      color: var(--text);
+      color: #ffffff;
       font-weight: 600;
       font-family: var(--mono);
       word-break: break-all;
@@ -280,9 +285,9 @@
     .token-box {
       font-family: var(--mono);
       font-size: 11px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: #38bdf8;
+      background: #000000;
+      border: 1px solid var(--card-border);
+      color: #ffffff;
       border-radius: var(--radius);
       padding: 10px 12px;
       word-break: break-all;
@@ -296,7 +301,7 @@
     }
 
     .cli-bar {
-      background: var(--input-bg);
+      background: #000000;
       border: 1px solid var(--card-border);
       padding: 8px 12px;
       border-radius: var(--radius);
@@ -309,14 +314,14 @@
 
     .cli-bar code {
       font-family: var(--mono);
-      color: #9ca3af;
+      color: #ffffff;
       overflow-x: auto;
       white-space: nowrap;
     }
 
     .card-footer {
       padding: 12px 24px;
-      background: var(--card-alt);
+      background: var(--card-bg);
       border-top: 1px solid var(--card-border);
       font-size: 11px;
       color: var(--text-subtle);
@@ -326,12 +331,8 @@
     }
 
     .card-footer a {
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-
-    .card-footer a:hover {
       color: #ffffff;
+      text-decoration: underline;
     }
 
     .hidden {
@@ -437,7 +438,7 @@
           </div>
 
           <div class="action-row">
-            <button type="button" class="btn btn-success" onclick="downloadLicFile()">Download .lic File</button>
+            <button type="button" class="btn" onclick="downloadLicFile()">Download .lic File</button>
             <button type="button" class="btn btn-secondary" onclick="copyToken()">Copy License Key</button>
           </div>
 
@@ -462,7 +463,7 @@
 
         <div id="inspectResultBox" class="result-card hidden">
           <div class="result-summary-grid" id="inspectGrid"></div>
-          <pre id="inspectRawJson" style="font-family: var(--mono); font-size: 11px; background: var(--input-bg); border: 1px solid var(--card-border); padding: 10px; border-radius: 4px; color: #a5b4fc; overflow-x: auto;"></pre>
+          <pre id="inspectRawJson" style="font-family: var(--mono); font-size: 11px; background: #000000; border: 1px solid var(--card-border); padding: 10px; border-radius: 4px; color: #ffffff; overflow-x: auto;"></pre>
         </div>
       </div>
 
