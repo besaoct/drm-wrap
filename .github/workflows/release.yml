@@ -69,10 +69,21 @@ jobs:
           if [ -f "$RUNNER_TEMP/build.keychain" ]; then
             export CSC_KEYCHAIN="$RUNNER_TEMP/build.keychain"
           fi
+          
+          # Only export Apple ID for notarization if app-specific password is provided
+          if [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ]; then
+            export APPLE_ID="${{ secrets.APPLE_ID }}"
+            export APPLE_APP_SPECIFIC_PASSWORD="$APPLE_APP_SPECIFIC_PASSWORD"
+            echo "Apple notarization credentials provided; notarization enabled."
+          else
+            unset APPLE_ID
+            unset APPLE_APP_SPECIFIC_PASSWORD
+            echo "Notice: APPLE_APP_SPECIFIC_PASSWORD is not set in secrets; skipping Apple Notarization."
+          fi
+          
           npm run package --workspace=drm-wrap-desktop-app -- --publish never
           npm run package --workspace=drm-wrap-studio -- --publish never
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '63LNPXAB49' }}
 
