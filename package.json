@@ -7,16 +7,20 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace=drm-wrap",
+    "build": "npm run build --workspace=@besaoct/drm-wrap",
     "dev": "npm run dev --workspace=drm-wrap-desktop-app",
     "dev:studio": "npm run dev --workspace=drm-wrap-studio",
-    "typecheck": "npm run typecheck --workspace=drm-wrap",
+    "typecheck": "npm run typecheck --workspace=@besaoct/drm-wrap",
     "lint": "npm run lint --workspaces --if-present",
     "license:issue": "node packages/license-admin/scripts/issue-license.js",
     "license:keygen": "node packages/license-admin/scripts/keygen.js",
     "license:gui": "open tools/license-generator.html"
   },
-  "author": "besaoct <besaoct@gmail.com>",
+  "author": "besaoct",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/besaoct/drm-wrap.git"
+  },
   "engines": {
     "node": ">=20"
   },

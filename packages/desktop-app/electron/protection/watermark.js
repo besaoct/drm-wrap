@@ -4,6 +4,6 @@ const {
   getWatermarkPayload,
   sendWatermarkUpdate,
   startWatermarkRefresh,
-} = require("drm-wrap/core");
+} = require("@besaoct/drm-wrap/core");
 
 module.exports = { buildWatermarkText, getWatermarkPayload, sendWatermarkUpdate, startWatermarkRefresh };

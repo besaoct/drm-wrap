@@ -1,4 +1,4 @@
-# drm-wrap
+# @besaoct/drm-wrap
 
 Convert any website into a secure, DRM-protected Electron desktop app — anti-screenshot / anti-screen-recording protection, a dynamic watermark, and an invisible mode that hides the app during meeting screen shares. No Electron knowledge required. Full spec: [`DRMwrap.md`](../../DRMwrap.md).
 
@@ -21,7 +21,7 @@ A key can optionally be domain-locked (it'll only work for a project whose `base
 
 ```bash
 # Scaffold a new project (interactive: app name, base URL, logo, features)
-npx drm-wrap init
+npx @besaoct/drm-wrap init
 
 # Adjust feature toggles / window / build settings later
 npx drm-wrap config
@@ -112,6 +112,6 @@ Supported values:
 
 If no `data-drm` attributes are present anywhere on the page and Full App Protection is enabled (the default), the whole window is protected regardless.
 
-## Programmatic exports (`drm-wrap/core`)
+## Programmatic exports (`@besaoct/drm-wrap/core`)
 
-The package also exposes its detection/protection engine, shared types, IPC channel constants, and config loader as `require("drm-wrap/core")` (or `require("drm-wrap")`, an alias for the same entry point). This is what the generated Electron app's **main process** imports to run the detection engine, apply content protection, manage invisible mode, and load/watch `drm-wrap.config.json` — it is not typically something end users import directly, since the CLI already wires it up for you inside every project `init` generates.
+The package also exposes its detection/protection engine, shared types, IPC channel constants, and config loader as `require("@besaoct/drm-wrap/core")` (or `require("@besaoct/drm-wrap")`, an alias for the same entry point). This is what the generated Electron app's **main process** imports to run the detection engine, apply content protection, manage invisible mode, and load/watch `drm-wrap.config.json` — it is not typically something end users import directly, since the CLI already wires it up for you inside every project `init` generates.

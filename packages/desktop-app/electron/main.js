@@ -21,7 +21,7 @@ const {
   DetectionEngine,
   InvisibleModeManager,
   signatureDatabase,
-} = require("drm-wrap/core");
+} = require("@besaoct/drm-wrap/core");
 
 const APP_ROOT = app.getAppPath();
 const LOG_PATH = path.join(app.getPath("userData"), "drm-wrap.log");

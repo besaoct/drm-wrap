@@ -1,8 +1,17 @@
 {
-  "name": "drm-wrap",
+  "name": "@besaoct/drm-wrap",
   "version": "1.0.0",
   "description": "Convert any website into a secure, DRM-protected Electron desktop app with anti-screen-capture and screen-recording detection.",
+  "author": "besaoct",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/besaoct/drm-wrap.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
   "bin": {
     "drm-wrap": "./dist/cli/index.js"
   },

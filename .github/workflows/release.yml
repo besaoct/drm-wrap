@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build:
@@ -117,20 +118,44 @@ jobs:
             dist-release/*.blockmap
 
   release:
-    name: Publish GitHub Release
+    name: Publish GitHub Release & Packages
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Core Engine & Packages
+        run: npm run build
 
       - name: Download All Build Artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-dist
           merge-multiple: true
+
+      - name: Pack npm package tarball
+        run: |
+          npm pack --workspace=@besaoct/drm-wrap --pack-destination release-dist
+
+      - name: Publish npm package to GitHub Packages
+        run: |
+          npm config set //npm.pkg.github.com/:_authToken "${{ secrets.GITHUB_TOKEN }}"
+          npm publish --workspace=@besaoct/drm-wrap || echo "Package @besaoct/drm-wrap already published or version exists."
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine Release Tag
         id: tag
@@ -154,5 +179,6 @@ jobs:
             release-dist/*.exe
             release-dist/*.zip
             release-dist/*.blockmap
+            release-dist/*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

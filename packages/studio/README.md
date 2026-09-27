@@ -28,7 +28,7 @@ uses. There is one implementation of the product logic; this package only adds s
 ```bash
 # from the repo root
 npm install
-npm run build --workspace=drm-wrap   # DRMWrap depends on drm-wrap/core — build it first
+npm run build --workspace=@besaoct/drm-wrap   # DRMWrap depends on @besaoct/drm-wrap/core — build it first
 npm run dev:studio
 ```
 

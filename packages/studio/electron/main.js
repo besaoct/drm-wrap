@@ -13,7 +13,7 @@ const {
   validateConfig,
   saveConfig,
   personalizeGeneratedProject,
-} = require("drm-wrap/core");
+} = require("@besaoct/drm-wrap/core");
 
 let mainWindow = null;
 let runningProcess = null;

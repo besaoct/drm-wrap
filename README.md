@@ -94,7 +94,7 @@ drm-wrap/
 
 | Package / Module | Role | Publishing Target |
 |---|---|---|
-| **[`packages/lib`](./packages/lib)** | Core detection engine, CLI commands, and scaffold generator. | Published (`npm: drm-wrap`) |
+| **[`packages/lib`](./packages/lib)** | Core detection engine, CLI commands, and scaffold generator. | Published (`@besaoct/drm-wrap` on GitHub Packages) |
 | **[`packages/desktop-app`](./packages/desktop-app)** | Production Electron shell injected with DRM listeners and preload bridges. | Bundled into scaffolded builds |
 | **[`packages/studio`](./packages/studio)** | **DRMWrap**: Complete GUI desktop application for building apps without terminal commands. | Desktop Installer (`.dmg`, `.exe`) |
 | **[`packages/license-admin`](./packages/license-admin)** | Keypair creation and command-line license issuing scripts. | Internal (Never Published) |
@@ -150,19 +150,19 @@ Once published or linked, users can wrap any website in 5 simple commands:
 
 ```bash
 # 1. Initialize a new wrapped desktop project
-npx drm-wrap init
+npx @besaoct/drm-wrap init
 
 # 2. Customize protections (Anti-screenshot, Watermark, Recorder detection)
-npx drm-wrap config
+npx @besaoct/drm-wrap config
 
 # 3. Test and preview in live Electron development mode
-npx drm-wrap dev
+npx @besaoct/drm-wrap dev
 
 # 4. Activate your commercial license key
-npx drm-wrap license activate <YOUR_TOKEN_STRING>
+npx @besaoct/drm-wrap license activate <YOUR_TOKEN_STRING>
 
 # 5. Build production installers (.exe for Windows, .dmg for macOS)
-npx drm-wrap build
+npx @besaoct/drm-wrap build
 ```
 
 ---
