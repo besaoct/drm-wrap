@@ -1,0 +1,29 @@
+appId: com.drmwrap.app
+productName: My Secure Portal
+electronVersion: 31.7.7
+directories:
+  output: release
+  buildResources: public
+files:
+  - electron/**/*
+  - public/**/*
+  - drm-wrap.config.json
+  - node_modules/**/*
+  - package.json
+asar: true
+win:
+  target:
+    - nsis
+    - portable
+  icon: public/logo.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  target:
+    - dmg
+    - zip
+  icon: public/logo.png
+  category: public.app-category.business
+  hardenedRuntime: true
+  gatekeeperAssess: false
