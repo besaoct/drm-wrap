@@ -3,31 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DRM-Wrap — Software License Generator</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230f172a'/%3E%3Cpath d='M256 64L104 128V248C104 344 168 432 256 464C344 432 408 344 408 248V128L256 64Z' fill='%232563eb' fill-opacity='0.2' stroke='%233b82f6' stroke-width='24' stroke-linejoin='round'/%3E%3Cellipse cx='256' cy='256' rx='140' ry='56' fill='none' stroke='%2360a5fa' stroke-width='16' stroke-dasharray='30 18' transform='rotate(-25 256 256)'/%3E%3Ccircle cx='256' cy='256' r='32' fill='%2360a5fa'/%3E%3Cpath d='M256 272V304' stroke='%230f172a' stroke-width='14' stroke-linecap='round'/%3E%3C/svg%3E">
+  <title>DRM-Wrap License Generator</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230f172a'/%3E%3Cpath d='M256 96L128 152V256C128 340 184 416 256 440C328 416 384 340 384 256V152L256 96Z' fill='%232563eb'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: rgba(15, 23, 42, 0.85);
-      --card-border: rgba(51, 65, 85, 0.65);
-      --card-hover-border: rgba(99, 102, 241, 0.45);
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --primary-light: rgba(99, 102, 241, 0.15);
-      --accent: #06b6d4;
-      --success: #10b981;
-      --success-bg: rgba(16, 185, 129, 0.12);
-      --success-border: rgba(16, 185, 129, 0.35);
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-header: #1e293b;
+      --panel-alt: #162032;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-hover: #15803d;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --text-subtle: #64748b;
-      --input-bg: #0b1120;
-      --input-border: #1e293b;
-      --radius: 12px;
-      --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --text-dim: #64748b;
+      --input-bg: #0f172a;
+      --input-border: #334155;
+      --radius: 6px;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --mono: 'JetBrains Mono', monospace;
     }
 
@@ -37,14 +34,11 @@
       padding: 0;
       font-family: var(--font);
       -webkit-font-smoothing: antialiased;
+      box-shadow: none !important;
     }
 
     body {
       background-color: var(--bg);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
-        radial-gradient(at 50% 100%, rgba(30, 41, 59, 0.5) 0px, transparent 50%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -56,110 +50,70 @@
 
     .container {
       width: 100%;
-      max-width: 640px;
+      max-width: 600px;
     }
 
     .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
+      background: var(--panel);
       border-radius: var(--radius);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.05);
       overflow: hidden;
-      transition: border-color 0.2s ease;
     }
 
     .card-header {
-      padding: 28px 24px;
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
-      border-bottom: 1px solid var(--card-border);
-      text-align: center;
-      position: relative;
-    }
-
-    .logo-container {
-      width: 60px;
-      height: 60px;
-      margin: 0 auto 14px auto;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(6, 182, 212, 0.2));
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 20px -4px rgba(79, 70, 229, 0.35);
+      padding: 20px 24px;
+      background: var(--panel-header);
+      text-align: left;
     }
 
     .card-header h1 {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .card-header h1 .badge-ver {
-      font-size: 11px;
+      font-size: 18px;
       font-weight: 700;
-      background: rgba(99, 102, 241, 0.25);
-      color: #a5b4fc;
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      padding: 2px 8px;
-      border-radius: 999px;
-      letter-spacing: 0;
+      letter-spacing: -0.01em;
+      color: #ffffff;
     }
 
     .card-header p {
       font-size: 13px;
       color: var(--text-muted);
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
     .tabs {
       display: flex;
-      background: rgba(11, 17, 32, 0.8);
-      border-bottom: 1px solid var(--card-border);
-      padding: 4px;
+      background: var(--panel-alt);
+      padding: 0 16px;
       gap: 4px;
     }
 
     .tab-btn {
-      flex: 1;
       background: transparent;
       border: none;
       color: var(--text-muted);
-      padding: 10px 14px;
-      font-size: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
       font-weight: 600;
-      border-radius: 8px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.15s ease;
+      gap: 6px;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
     }
 
     .tab-btn.active {
-      background: rgba(30, 41, 59, 0.9);
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border-bottom: 2px solid var(--primary);
     }
 
     .tab-btn:hover:not(.active) {
       color: var(--text);
-      background: rgba(255, 255, 255, 0.03);
     }
 
     .card-body {
       padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
     }
 
     .form-group {
@@ -176,48 +130,25 @@
 
     label {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
-    }
-
-    .status-badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 999px;
-      letter-spacing: 0;
-    }
-
-    .badge-amber {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .badge-emerald {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     input, select, textarea {
       background: var(--input-bg);
       border: 1px solid var(--input-border);
       color: var(--text);
-      padding: 10px 14px;
-      border-radius: 8px;
+      padding: 9px 12px;
+      border-radius: var(--radius);
       font-size: 13px;
-      font-weight: 400;
       outline: none;
-      transition: all 0.15s ease;
       width: 100%;
     }
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
     }
 
     textarea {
@@ -225,16 +156,16 @@
       font-size: 11px;
       line-height: 1.5;
       resize: vertical;
-      min-height: 76px;
+      min-height: 72px;
     }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 12px;
     }
 
-    @media (max-width: 540px) {
+    @media (max-width: 520px) {
       .grid-2 {
         grid-template-columns: 1fr;
       }
@@ -244,91 +175,62 @@
       font-family: var(--font);
       background: var(--primary);
       color: #ffffff;
-      border: 1px solid transparent;
-      padding: 11px 18px;
-      border-radius: 8px;
+      border: none;
+      padding: 10px 16px;
+      border-radius: var(--radius);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: all 0.15s ease;
+      gap: 6px;
+      transition: background 0.15s ease;
     }
 
     .btn:hover {
       background: var(--primary-hover);
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-    }
-
-    .btn:active {
-      transform: translateY(1px);
     }
 
     .btn-secondary {
-      background: rgba(30, 41, 59, 0.8);
-      border: 1px solid var(--card-border);
+      background: #334155;
       color: var(--text);
     }
 
     .btn-secondary:hover {
-      background: #1e293b;
-      border-color: var(--text-subtle);
-      box-shadow: none;
+      background: #475569;
     }
 
-    .btn-emerald {
-      background: #059669;
+    .btn-success {
+      background: var(--success);
     }
 
-    .btn-emerald:hover {
-      background: #047857;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    .btn-success:hover {
+      background: var(--success-hover);
     }
 
     .btn-sm {
-      padding: 6px 12px;
+      padding: 4px 10px;
       font-size: 11px;
-      border-radius: 6px;
     }
 
     .result-card {
-      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
-      border: 1px solid var(--success-border);
-      border-radius: 10px;
+      background: var(--panel-alt);
+      border-radius: var(--radius);
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .result-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: #34d399;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
     .result-summary-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      font-size: 11px;
-      background: rgba(11, 17, 32, 0.6);
+      gap: 10px;
+      font-size: 12px;
+      background: var(--input-bg);
       padding: 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: var(--radius);
     }
 
     .summary-item {
@@ -338,7 +240,7 @@
     }
 
     .summary-item span:first-child {
-      color: var(--text-subtle);
+      color: var(--text-dim);
       font-size: 10px;
       text-transform: uppercase;
       font-weight: 600;
@@ -354,11 +256,11 @@
     .token-box {
       font-family: var(--mono);
       font-size: 11px;
-      background: #060911;
-      border: 1px solid #1e293b;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
       color: #38bdf8;
-      border-radius: 8px;
-      padding: 12px;
+      border-radius: var(--radius);
+      padding: 10px 12px;
       word-break: break-all;
       user-select: all;
     }
@@ -366,32 +268,44 @@
     .action-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .helper-text {
+    .cli-bar {
+      background: var(--input-bg);
+      padding: 8px 12px;
+      border-radius: var(--radius);
       font-size: 11px;
-      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cli-bar code {
+      font-family: var(--mono);
+      color: #94a3b8;
+      overflow-x: auto;
+      white-space: nowrap;
     }
 
     .card-footer {
-      padding: 14px 24px;
-      background: rgba(11, 17, 32, 0.7);
-      border-top: 1px solid var(--card-border);
+      padding: 12px 24px;
+      background: var(--panel-alt);
       font-size: 11px;
-      color: var(--text-subtle);
+      color: var(--text-dim);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .card-footer a {
-      color: #818cf8;
+      color: var(--text-muted);
       text-decoration: none;
     }
 
     .card-footer a:hover {
-      text-decoration: underline;
+      color: #ffffff;
     }
 
     .hidden {
@@ -406,29 +320,14 @@
       
       <!-- Card Header -->
       <div class="card-header">
-        <div class="logo-container">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="34" height="34">
-            <rect width="512" height="512" rx="112" fill="#0f172a" />
-            <path d="M256 64L104 128V248C104 344 168 432 256 464C344 432 408 344 408 248V128L256 64Z" fill="#2563eb" fill-opacity="0.25" stroke="#3b82f6" stroke-width="24" stroke-linejoin="round" />
-            <ellipse cx="256" cy="256" rx="140" ry="56" fill="none" stroke="#60a5fa" stroke-width="16" stroke-dasharray="30 18" transform="rotate(-25 256 256)" />
-            <circle cx="256" cy="256" r="32" fill="#60a5fa" />
-            <path d="M256 272V304" stroke="#0f172a" stroke-width="14" stroke-linecap="round" />
-          </svg>
-        </div>
-        <h1>DRM-Wrap <span class="badge-ver">v1.0.0</span></h1>
-        <p>Software License Authority • Ed25519 Cryptographic Suite</p>
+        <h1>DRM-Wrap License Generator</h1>
+        <p>Offline Ed25519 Cryptographic Licensing Tool</p>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="tabs">
-        <button type="button" class="tab-btn active" id="tabGenBtn" onclick="switchTab('gen')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-          Issue License
-        </button>
-        <button type="button" class="tab-btn" id="tabVerifyBtn" onclick="switchTab('verify')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-          Verify &amp; Inspect
-        </button>
+        <button type="button" class="tab-btn active" id="tabGenBtn" onclick="switchTab('gen')">Issue License</button>
+        <button type="button" class="tab-btn" id="tabVerifyBtn" onclick="switchTab('verify')">Verify License</button>
       </div>
 
       <!-- Tab 1: License Generator Form -->
@@ -437,24 +336,20 @@
         <!-- Private Key Input -->
         <div class="form-group">
           <div class="label-row">
-            <label>Vendor Ed25519 Private Key (PKCS#8 PEM)</label>
-            <span id="keyStatusBadge" class="status-badge badge-amber">Key Required</span>
+            <label>Private Key (PKCS#8 PEM)</label>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="clearStoredKey()">Clear Stored Key</button>
           </div>
-          <textarea id="privateKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----&#10;MC4CAQAwBQYDK2VwBCIEI...&#10;-----END PRIVATE KEY-----"></textarea>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
-            <span class="helper-text">Stored safely in browser localStorage (never sent over the network).</span>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="clearStoredKey()" style="padding: 2px 8px; font-size: 10px;">Clear</button>
-          </div>
+          <textarea id="privateKeyInput" rows="3" placeholder="-----BEGIN PRIVATE KEY-----&#10;...&#10;-----END PRIVATE KEY-----"></textarea>
         </div>
 
         <!-- Customer & Email -->
         <div class="grid-2">
           <div class="form-group">
-            <label>Customer / Organization Name</label>
-            <input type="text" id="customerInput" placeholder="e.g. Acme Corporation" required>
+            <label>Customer Name</label>
+            <input type="text" id="customerInput" placeholder="e.g. Acme Corp" required>
           </div>
           <div class="form-group">
-            <label>Customer Contact Email</label>
+            <label>Customer Email</label>
             <input type="email" id="emailInput" placeholder="e.g. dev@acme.com" required>
           </div>
         </div>
@@ -464,26 +359,26 @@
           <div class="form-group">
             <label>License Tier</label>
             <select id="tierSelect">
-              <option value="single">Single Application (Standard)</option>
-              <option value="extended">Extended Distribution / Multi-App</option>
+              <option value="single">Single Application</option>
+              <option value="extended">Extended Distribution</option>
             </select>
           </div>
           <div class="form-group">
             <label>Domain Lock (Optional)</label>
-            <input type="text" id="domainInput" placeholder="e.g. acme.com (leave blank for any)">
+            <input type="text" id="domainInput" placeholder="e.g. acme.com">
           </div>
         </div>
 
         <!-- Validity & Duration -->
         <div class="grid-2">
           <div class="form-group">
-            <label>Validity Period</label>
+            <label>Validity</label>
             <select id="validityTypeSelect" onchange="handleValidityChange()">
-              <option value="perpetual">Lifetime / Perpetual (Never Expires)</option>
-              <option value="subscription" selected>Annual Subscription (365 Days)</option>
-              <option value="trial">Trial Period (14 Days)</option>
-              <option value="custom_days">Custom Number of Days</option>
-              <option value="short_test">Test Expiry (Minutes / Seconds)</option>
+              <option value="subscription" selected>Subscription (365 Days)</option>
+              <option value="perpetual">Lifetime (Never Expires)</option>
+              <option value="trial">Trial (14 Days)</option>
+              <option value="custom_days">Custom Days</option>
+              <option value="short_test">Test (Minutes / Seconds)</option>
               <option value="specific_date">Specific Date</option>
             </select>
           </div>
@@ -501,84 +396,54 @@
           </div>
         </div>
 
-        <!-- Quick actions -->
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="populateDemoData()">
-            ⚡ Quick Fill Demo
-          </button>
-          <span class="helper-text">Ed25519 Asymmetric Signature</span>
-        </div>
-
         <!-- Submit Button -->
         <button type="button" class="btn" onclick="generateLicense()" style="width: 100%; margin-top: 4px;">
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-          Generate Signed License Key
+          Generate License Key
         </button>
 
         <!-- Result Box -->
         <div id="resultBox" class="result-card hidden">
-          <div class="result-header">
-            <div class="result-title">
-              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              License Signed &amp; Cryptographically Verified
-            </div>
-            <span class="status-badge badge-emerald">Valid Ed25519</span>
-          </div>
-
-          <div class="result-summary-grid" id="summaryGrid">
-            <!-- Populated via JS -->
-          </div>
+          <div class="result-summary-grid" id="summaryGrid"></div>
 
           <div class="form-group">
-            <label>License Token Key (Send to Customer):</label>
+            <label>License Key</label>
             <textarea id="tokenOutput" readonly rows="3" class="token-box" onclick="this.select()"></textarea>
           </div>
 
           <div class="action-row">
-            <button type="button" class="btn btn-emerald" onclick="downloadLicFile()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Download .lic File
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="copyToken()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-              Copy Activation Key
-            </button>
+            <button type="button" class="btn btn-success" onclick="downloadLicFile()">Download .lic File</button>
+            <button type="button" class="btn btn-secondary" onclick="copyToken()">Copy License Key</button>
           </div>
 
-          <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 12px; font-size: 11px; display: flex; align-items: center; justify-content: space-between;">
-            <code style="color: #cbd5e1;" id="cliActivateCmd">npx drm-wrap license activate &lt;key&gt;</code>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="copyCliCmd()" style="padding: 2px 8px; font-size: 10px;">Copy CLI Cmd</button>
+          <div class="cli-bar">
+            <code id="cliActivateCmd">npx drm-wrap license activate &lt;key&gt;</code>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyCliCmd()">Copy</button>
           </div>
         </div>
 
       </div>
 
-      <!-- Tab 2: Verify & Inspect -->
+      <!-- Tab 2: Verify License -->
       <div id="verifyTabContent" class="card-body hidden">
         <div class="form-group">
-          <label>Paste DRM-Wrap License Token</label>
-          <textarea id="inspectTokenInput" rows="3" placeholder="eyJsaWNlbnNlSWQiOi..."></textarea>
+          <label>License Token</label>
+          <textarea id="inspectTokenInput" rows="3" placeholder="Paste token here..."></textarea>
         </div>
 
         <button type="button" class="btn btn-secondary" onclick="verifyAndInspectToken()">
-          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-          Inspect &amp; Verify Signature
+          Verify Signature
         </button>
 
         <div id="inspectResultBox" class="result-card hidden">
-          <div class="result-header">
-            <div class="result-title" id="inspectTitle">Signature Verification Result</div>
-            <span class="status-badge" id="inspectBadge">Unknown</span>
-          </div>
           <div class="result-summary-grid" id="inspectGrid"></div>
-          <pre id="inspectRawJson" style="font-family: var(--mono); font-size: 11px; background: #060911; padding: 10px; border-radius: 6px; color: #a5b4fc; overflow-x: auto;"></pre>
+          <pre id="inspectRawJson" style="font-family: var(--mono); font-size: 11px; background: var(--input-bg); padding: 10px; border-radius: 4px; color: #a5b4fc; overflow-x: auto;"></pre>
         </div>
       </div>
 
       <!-- Card Footer -->
       <div class="card-footer">
-        <span>Vendor License Authority &bull; Proprietary &copy; 2026 @besaoct</span>
-        <a href="https://github.com/besaoct/drm-wrap" target="_blank" rel="noopener">GitHub Repository</a>
+        <span>Proprietary &copy; 2026 @besaoct</span>
+        <a href="https://github.com/besaoct/drm-wrap" target="_blank" rel="noopener">GitHub</a>
       </div>
 
     </div>
@@ -593,14 +458,10 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
     let currentLicenseDoc = null;
     let currentToken = '';
 
-    // Initialize
     window.addEventListener('DOMContentLoaded', () => {
       const savedKey = localStorage.getItem(STORAGE_KEY);
       if (savedKey) {
         document.getElementById('privateKeyInput').value = savedKey;
-        setKeyBadge(true);
-      } else {
-        setKeyBadge(false);
       }
     });
 
@@ -608,28 +469,14 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
       const val = e.target.value.trim();
       if (val) {
         localStorage.setItem(STORAGE_KEY, val);
-        setKeyBadge(true);
       } else {
         localStorage.removeItem(STORAGE_KEY);
-        setKeyBadge(false);
       }
     });
-
-    function setKeyBadge(hasKey) {
-      const badge = document.getElementById('keyStatusBadge');
-      if (hasKey) {
-        badge.textContent = 'Saved Locally';
-        badge.className = 'status-badge badge-emerald';
-      } else {
-        badge.textContent = 'Key Required';
-        badge.className = 'status-badge badge-amber';
-      }
-    }
 
     function clearStoredKey() {
       localStorage.removeItem(STORAGE_KEY);
       document.getElementById('privateKeyInput').value = '';
-      setKeyBadge(false);
     }
 
     function switchTab(tab) {
@@ -671,20 +518,20 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
         dateInput.style.display = 'none';
       } else if (val === 'trial') {
         detailGroup.style.display = 'flex';
-        detailLabel.textContent = 'Trial Duration (Days)';
+        detailLabel.textContent = 'Trial (Days)';
         daysWrapper.style.display = 'flex';
         timeUnitSelect.style.display = 'none';
         daysInput.value = '14';
         dateInput.style.display = 'none';
       } else if (val === 'custom_days') {
         detailGroup.style.display = 'flex';
-        detailLabel.textContent = 'Custom Validity (Days)';
+        detailLabel.textContent = 'Custom Days';
         daysWrapper.style.display = 'flex';
         timeUnitSelect.style.display = 'none';
         dateInput.style.display = 'none';
       } else if (val === 'short_test') {
         detailGroup.style.display = 'flex';
-        detailLabel.textContent = 'Test Validity Period';
+        detailLabel.textContent = 'Test Validity';
         daysWrapper.style.display = 'flex';
         timeUnitSelect.style.display = 'block';
         daysInput.value = '5';
@@ -699,14 +546,6 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
       }
     }
 
-    function populateDemoData() {
-      document.getElementById('customerInput').value = 'Wayne Enterprises';
-      document.getElementById('emailInput').value = 'bruce@wayne.com';
-      document.getElementById('tierSelect').value = 'extended';
-      document.getElementById('domainInput').value = 'wayne.com';
-    }
-
-    // Binary / Base64 Helpers
     function pemToBinary(pem) {
       const lines = pem.trim().split(/\r?\n/);
       const clean = lines.filter(l => !l.startsWith('-----')).join('');
@@ -746,7 +585,6 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
       return bytes;
     }
 
-    // Main Generator
     async function generateLicense() {
       const pem = document.getElementById('privateKeyInput').value.trim();
       const customer = document.getElementById('customerInput').value.trim();
@@ -756,7 +594,7 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
       const validityType = document.getElementById('validityTypeSelect').value;
 
       if (!pem) {
-        alert('Please paste or load your Vendor Ed25519 Private Key (PKCS#8 PEM).');
+        alert('Please enter your Ed25519 Private Key.');
         return;
       }
       if (!customer || !email) {
@@ -777,7 +615,7 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
       } else if (validityType === 'specific_date') {
         const d = document.getElementById('dateInput').value;
         if (!d) {
-          alert('Please pick a valid expiry date.');
+          alert('Please pick an expiry date.');
           return;
         }
         expiresAt = new Date(d + 'T23:59:59.999Z').toISOString();
@@ -813,7 +651,6 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
         const payloadBytes = new TextEncoder().encode(payloadJson);
         const payload64 = base64UrlEncode(payloadBytes);
 
-        // Sign the base64url payload ASCII bytes directly (wire specification)
         const dataToSign = new TextEncoder().encode(payload64);
         const sigBuffer = await crypto.subtle.sign({ name: 'Ed25519' }, privateKey, dataToSign);
         const signature64 = base64UrlEncode(new Uint8Array(sigBuffer));
@@ -822,7 +659,6 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
         currentToken = token;
         currentLicenseDoc = { token, ...payload };
 
-        // Render Summary
         const grid = document.getElementById('summaryGrid');
         grid.innerHTML = `
           <div class="summary-item">
@@ -838,8 +674,8 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
             <span>${payload.tier.toUpperCase()}</span>
           </div>
           <div class="summary-item">
-            <span>Domain Lock</span>
-            <span>${payload.domain || 'Any (Unrestricted)'}</span>
+            <span>Domain</span>
+            <span>${payload.domain || 'Unrestricted'}</span>
           </div>
           <div class="summary-item">
             <span>Expires</span>
@@ -847,7 +683,7 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
           </div>
           <div class="summary-item">
             <span>License ID</span>
-            <span>${payload.licenseId.slice(0, 13)}...</span>
+            <span>${payload.licenseId}</span>
           </div>
         `;
 
@@ -857,7 +693,7 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
 
       } catch (err) {
         console.error(err);
-        alert('Failed to generate license: ' + err.message + '\nPlease verify your Ed25519 private key is in PKCS#8 PEM format.');
+        alert('Failed to generate license: ' + err.message);
       }
     }
 
@@ -877,27 +713,24 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
     function copyToken() {
       if (!currentToken) return;
       navigator.clipboard.writeText(currentToken);
-      alert('Activation Token Key copied to clipboard!');
+      alert('License key copied to clipboard.');
     }
 
     function copyCliCmd() {
       if (!currentToken) return;
       const cmd = `npx drm-wrap license activate "${currentToken}"`;
       navigator.clipboard.writeText(cmd);
-      alert('CLI activation command copied to clipboard!');
+      alert('CLI activation command copied to clipboard.');
     }
 
-    // Verify & Inspect tab logic
     async function verifyAndInspectToken() {
       const input = document.getElementById('inspectTokenInput').value.trim();
       const resultBox = document.getElementById('inspectResultBox');
-      const title = document.getElementById('inspectTitle');
-      const badge = document.getElementById('inspectBadge');
       const grid = document.getElementById('inspectGrid');
       const raw = document.getElementById('inspectRawJson');
 
       if (!input) {
-        alert('Please paste a license token to inspect.');
+        alert('Please paste a license token.');
         return;
       }
 
@@ -913,7 +746,6 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
         const payloadJson = new TextDecoder().decode(payloadBytes);
         const payload = JSON.parse(payloadJson);
 
-        // Verify using embedded public key
         const pubDer = pemToBinary(EMBEDDED_PUBLIC_KEY_PEM);
         const pubKey = await crypto.subtle.importKey(
           'spki',
@@ -925,35 +757,18 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
 
         const dataBytes = new TextEncoder().encode(parts[0]);
         const isValidSig = await crypto.subtle.verify({ name: 'Ed25519' }, pubKey, sigBytes, dataBytes);
-
         const isExpired = payload.expiresAt && new Date(payload.expiresAt).getTime() < Date.now();
 
         resultBox.classList.remove('hidden');
-        if (isValidSig && !isExpired) {
-          title.textContent = 'Valid Active License';
-          title.style.color = '#34d399';
-          badge.textContent = 'VERIFIED ✓';
-          badge.className = 'status-badge badge-emerald';
-        } else if (isValidSig && isExpired) {
-          title.textContent = 'Expired License';
-          title.style.color = '#fbbf24';
-          badge.textContent = 'EXPIRED';
-          badge.className = 'status-badge badge-amber';
-        } else {
-          title.textContent = 'Signature Invalid (Tampered or Untrusted)';
-          title.style.color = '#f87171';
-          badge.textContent = 'INVALID ✗';
-          badge.className = 'status-badge badge-amber';
-        }
 
         grid.innerHTML = `
           <div class="summary-item">
             <span>Customer</span>
-            <span>${payload.customer || 'Unknown'}</span>
+            <span>${payload.customer || '-'}</span>
           </div>
           <div class="summary-item">
             <span>Email</span>
-            <span>${payload.email || 'Unknown'}</span>
+            <span>${payload.email || '-'}</span>
           </div>
           <div class="summary-item">
             <span>Tier</span>
@@ -961,15 +776,15 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
           </div>
           <div class="summary-item">
             <span>Domain</span>
-            <span>${payload.domain || 'Any (Unrestricted)'}</span>
+            <span>${payload.domain || 'Unrestricted'}</span>
+          </div>
+          <div class="summary-item">
+            <span>Status</span>
+            <span>${isValidSig ? (isExpired ? 'EXPIRED' : 'VALID') : 'INVALID SIGNATURE'}</span>
           </div>
           <div class="summary-item">
             <span>Expires</span>
-            <span>${payload.expiresAt || 'Never (Perpetual)'}</span>
-          </div>
-          <div class="summary-item">
-            <span>Signature Verified</span>
-            <span>${isValidSig ? 'PASS (Ed25519)' : 'FAIL'}</span>
+            <span>${payload.expiresAt ? new Date(payload.expiresAt).toLocaleDateString() : 'Never'}</span>
           </div>
         `;
 
@@ -977,7 +792,7 @@ MCowBQYDK2VwAyEAXmXJSCjIdFJZFhyxnjYERSz8Ybz6eBA57TrdbHZTFlc=
 
       } catch (err) {
         console.error(err);
-        alert('Failed to parse or verify license token: ' + err.message);
+        alert('Failed to parse license token: ' + err.message);
       }
     }
   </script>
