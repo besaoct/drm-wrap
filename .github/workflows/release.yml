@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -43,14 +43,35 @@ jobs:
       - name: Build Core Engine & Packages
         run: npm run build
 
-      - name: Package macOS Applications with Developer Certificate (.dmg & .zip)
+      - name: Setup macOS Keychain for Code Signing
         if: matrix.platform == 'mac'
-        run: |
-          npm run package --workspace=drm-wrap-desktop-app -- --publish never
-          npm run package --workspace=drm-wrap-studio -- --publish never
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: |
+          if [ -z "$CSC_LINK" ]; then
+            echo "CSC_LINK secret is not provided; skipping keychain setup."
+            exit 0
+          fi
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          security create-keychain -p "buildpass" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "buildpass" "$KEYCHAIN_PATH"
+          echo "$CSC_LINK" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$KEYCHAIN_PATH" -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productsign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "buildpass" "$KEYCHAIN_PATH"
+          rm -f "$RUNNER_TEMP/certificate.p12"
+
+      - name: Package macOS Applications with Developer Certificate (.dmg & .zip)
+        if: matrix.platform == 'mac'
+        run: |
+          cp -r packages/desktop-app/build . 2>/dev/null || true
+          if [ -f "$RUNNER_TEMP/build.keychain" ]; then
+            export CSC_KEYCHAIN="$RUNNER_TEMP/build.keychain"
+          fi
+          npm run package --workspace=drm-wrap-desktop-app -- --publish never
+          npm run package --workspace=drm-wrap-studio -- --publish never
+        env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '63LNPXAB49' }}
