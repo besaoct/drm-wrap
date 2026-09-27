@@ -2,6 +2,7 @@ appId: com.drmwrap.gui
 productName: DRMWrap
 copyright: Copyright © 2026 besaoct. All rights reserved.
 electronVersion: 31.7.7
+npmRebuild: false
 directories:
   output: release
   buildResources: public

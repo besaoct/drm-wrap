@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "DRM-Wrap generated Electron desktop app template (also doubles as the monorepo's live dev/demo app).",
+  "author": "besaoct <blackipie@outlook.com>",
   "main": "electron/main.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development electron .",

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "DRMWrap — the desktop GUI for building DRM-Wrap desktop apps without a terminal.",
+  "author": "besaoct <blackipie@outlook.com>",
   "main": "electron/main.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development electron .",
