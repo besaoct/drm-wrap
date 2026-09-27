@@ -1,5 +1,6 @@
 appId: com.drmwrap.app
 productName: My Secure Portal
+copyright: Copyright © 2026 besaoct. All rights reserved.
 electronVersion: 31.7.7
 directories:
   output: release
@@ -11,19 +12,37 @@ files:
   - node_modules/**/*
   - package.json
 asar: true
-win:
+mac:
+  category: public.app-category.business
+  icon: public/logo.icns
+  hardenedRuntime: true
+  minimumSystemVersion: "12.0"
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
+  gatekeeperAssess: false
+  notarize:
+    teamId: "63LNPXAB49"
   target:
-    - nsis
-    - portable
+    - target: dmg
+      arch:
+        - universal
+    - target: zip
+      arch:
+        - universal
+win:
   icon: public/logo.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+    - target: zip
+      arch:
+        - x64
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
-mac:
-  target:
-    - dmg
-    - zip
-  icon: public/logo.png
-  category: public.app-category.business
-  hardenedRuntime: true
-  gatekeeperAssess: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

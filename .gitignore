@@ -1,7 +1,8 @@
 node_modules/
 dist/
 out/
-build/
+/build/
+!packages/*/build/
 *.log
 .DS_Store
 .env

@@ -1,0 +1,129 @@
+name: Build & Publish Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Core Engine & Packages
+        run: npm run build
+
+      - name: Package macOS Applications with Developer Certificate (.dmg & .zip)
+        if: matrix.platform == 'mac'
+        run: |
+          npx electron-builder --mac --config packages/desktop-app/electron-builder.yml --publish never
+          npx electron-builder --mac --config packages/studio/electron-builder.yml --publish never
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '63LNPXAB49' }}
+
+      - name: Package Windows Applications (.exe NSIS & Portable)
+        if: matrix.platform == 'win'
+        run: |
+          npx electron-builder --win --config packages/desktop-app/electron-builder.yml --publish never
+          npx electron-builder --win --config packages/studio/electron-builder.yml --publish never
+        env:
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+
+      - name: Collect Release Artifacts
+        run: |
+          mkdir -p dist-release
+          cp packages/desktop-app/release/*.dmg dist-release/ 2>/dev/null || true
+          cp packages/desktop-app/release/*.exe dist-release/ 2>/dev/null || true
+          cp packages/desktop-app/release/*.zip dist-release/ 2>/dev/null || true
+          cp packages/desktop-app/release/*.blockmap dist-release/ 2>/dev/null || true
+          cp packages/studio/release/*.dmg dist-release/ 2>/dev/null || true
+          cp packages/studio/release/*.exe dist-release/ 2>/dev/null || true
+          cp packages/studio/release/*.zip dist-release/ 2>/dev/null || true
+          cp packages/studio/release/*.blockmap dist-release/ 2>/dev/null || true
+        shell: bash
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: |
+            dist-release/*.dmg
+            dist-release/*.exe
+            dist-release/*.zip
+            dist-release/*.blockmap
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download All Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-dist
+          merge-multiple: true
+
+      - name: Determine Release Tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "RELEASE_TAG=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          fi
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: "Release ${{ env.RELEASE_TAG }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            release-dist/*.dmg
+            release-dist/*.exe
+            release-dist/*.zip
+            release-dist/*.blockmap
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
