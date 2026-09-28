@@ -231,9 +231,59 @@
       )
     );
 
+    const consoleHeader = document.createElement("div");
+    consoleHeader.className = "console-header";
+
+    const consoleTitle = document.createElement("span");
+    consoleTitle.className = "console-title";
+    consoleTitle.textContent = "Terminal Output";
+
+    const consoleActions = document.createElement("div");
+    consoleActions.className = "console-actions";
+
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "console-btn";
+    copyBtn.type = "button";
+    copyBtn.textContent = "Copy";
+    copyBtn.title = "Copy terminal output";
+    copyBtn.addEventListener("click", async function () {
+      const text = logConsole.innerText || "";
+      if (!text.trim()) {
+        ctx.notify("No terminal output to copy.", "error");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        ctx.notify("Terminal output copied to clipboard.", "success");
+      } catch {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        ctx.notify("Terminal output copied to clipboard.", "success");
+      }
+    });
+
+    const clearBtn = document.createElement("button");
+    clearBtn.className = "console-btn";
+    clearBtn.type = "button";
+    clearBtn.textContent = "Clear";
+    clearBtn.title = "Clear terminal output";
+    clearBtn.addEventListener("click", function () {
+      logConsole.innerHTML = "";
+    });
+
+    consoleActions.appendChild(copyBtn);
+    consoleActions.appendChild(clearBtn);
+    consoleHeader.appendChild(consoleTitle);
+    consoleHeader.appendChild(consoleActions);
+
+    buildPane.appendChild(consoleHeader);
+
     const logConsole = document.createElement("div");
     logConsole.className = "log-console";
-    logConsole.style.marginTop = "20px";
     buildPane.appendChild(logConsole);
 
     const artifactsContainer = document.createElement("div");

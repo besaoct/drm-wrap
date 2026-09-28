@@ -2,7 +2,7 @@ const path = require("node:path");
 const fs = require("node:fs");
 const fsExtra = require("fs-extra");
 const { spawn } = require("node:child_process");
-const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require("electron");
 const {
   getActiveLicense,
   activateLicense,
@@ -332,9 +332,48 @@ function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+
+  mainWindow.webContents.on("context-menu", (_event, params) => {
+    const items = [];
+    if (params.selectionText && params.selectionText.trim().length > 0) {
+      items.push({ role: "copy" });
+    }
+    if (params.isEditable) {
+      items.push({ role: "paste" });
+      items.push({ role: "cut" });
+    }
+    items.push({ role: "selectAll" });
+    if (items.length > 0) {
+      Menu.buildFromTemplate(items).popup();
+    }
+  });
+}
+
+function setupApplicationMenu() {
+  const isMac = process.platform === "darwin";
+  const template = [
+    ...(isMac ? [{ role: "appMenu" }] : []),
+    { role: "fileMenu" },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ],
+    },
+    { role: "viewMenu" },
+    { role: "windowMenu" },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
 app.whenReady().then(() => {
+  setupApplicationMenu();
   registerIpcHandlers();
   createWindow();
 

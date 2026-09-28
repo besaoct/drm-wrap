@@ -145,13 +145,20 @@
       border-radius: var(--radius);
       font-size: 13px;
       font-weight: 400;
-      outline: none;
+      outline: none !important;
+      box-shadow: none !important;
       width: 100%;
       transition: border-color 0.15s ease;
+      -webkit-appearance: none;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus, input:focus-visible, select:focus, select:focus-visible, textarea:focus, textarea:focus-visible,
+    button:focus, button:focus-visible {
       border-color: var(--input-focus);
+      outline: none !important;
+      outline-offset: 0 !important;
+      box-shadow: none !important;
+      -webkit-focus-ring-color: transparent !important;
     }
 
     /* Custom Chevron Down for Select in Pure Black & White */
