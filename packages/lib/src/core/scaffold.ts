@@ -50,6 +50,57 @@ export async function personalizeGeneratedProject(targetDir: string, appName: st
   }
 }
 
+import { execFileSync } from "node:child_process";
+
+export async function applyLogoToProject(targetDir: string, logoPath: string): Promise<boolean> {
+  const resolvedLogoPath = path.resolve(logoPath.trim());
+  if (!(await fs.pathExists(resolvedLogoPath))) {
+    throw new Error(`Logo file not found at ${resolvedLogoPath}`);
+  }
+
+  const publicDir = path.join(targetDir, "public");
+  await fs.ensureDir(publicDir);
+
+  const destPng = path.join(publicDir, "logo.png");
+  await fs.copy(resolvedLogoPath, destPng);
+
+  // If on macOS, generate native Apple .icns with all icon sizes using built-in sips & iconutil
+  if (process.platform === "darwin") {
+    try {
+      const iconsetDir = path.join(publicDir, "logo.iconset");
+      await fs.remove(iconsetDir);
+      await fs.ensureDir(iconsetDir);
+
+      const sizes = [
+        { name: "icon_16x16.png", size: 16 },
+        { name: "icon_16x16@2x.png", size: 32 },
+        { name: "icon_32x32.png", size: 32 },
+        { name: "icon_32x32@2x.png", size: 64 },
+        { name: "icon_128x128.png", size: 128 },
+        { name: "icon_128x128@2x.png", size: 256 },
+        { name: "icon_256x256.png", size: 256 },
+        { name: "icon_256x256@2x.png", size: 512 },
+        { name: "icon_512x512.png", size: 512 },
+        { name: "icon_512x512@2x.png", size: 1024 },
+      ];
+
+      for (const s of sizes) {
+        execFileSync("sips", ["-z", String(s.size), String(s.size), destPng, "--out", path.join(iconsetDir, s.name)], {
+          stdio: "ignore",
+        });
+      }
+
+      const destIcns = path.join(publicDir, "logo.icns");
+      execFileSync("iconutil", ["-c", "icns", iconsetDir, "-o", destIcns], { stdio: "ignore" });
+      await fs.remove(iconsetDir);
+    } catch {
+      // Best-effort icon generation; continue even if sips/iconutil fails
+    }
+  }
+
+  return true;
+}
+
 export interface ScaffoldOptions {
   targetDir: string;
   appName: string;
@@ -99,12 +150,11 @@ export async function scaffoldProject(options: ScaffoldOptions): Promise<Scaffol
   let logoCopied = false;
   let logoError: string | undefined;
   if (options.logoPath && options.logoPath.trim().length > 0) {
-    const resolvedLogoPath = path.resolve(options.logoPath.trim());
-    if (await fs.pathExists(resolvedLogoPath)) {
-      await fs.copy(resolvedLogoPath, path.join(targetDir, "public", "logo.png"));
+    try {
+      await applyLogoToProject(targetDir, options.logoPath);
       logoCopied = true;
-    } else {
-      logoError = `Logo file not found at ${resolvedLogoPath}`;
+    } catch (err: any) {
+      logoError = err?.message || String(err);
     }
   }
 

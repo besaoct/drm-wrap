@@ -247,6 +247,16 @@ class DrmWrapRuntime {
 app.whenReady().then(() => {
   const config = loadConfig(APP_ROOT);
   const win = createWindow(config);
+
+  if (process.platform === "darwin" && app.dock) {
+    const logoPath = path.join(APP_ROOT, "public", "logo.png");
+    if (fs.existsSync(logoPath)) {
+      try {
+        app.dock.setIcon(logoPath);
+      } catch {}
+    }
+  }
+
   const runtime = new DrmWrapRuntime(win);
   runtime.apply(config);
 

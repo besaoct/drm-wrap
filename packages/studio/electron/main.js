@@ -13,6 +13,7 @@ const {
   validateConfig,
   saveConfig,
   personalizeGeneratedProject,
+  applyLogoToProject,
 } = require("@besaoct/drm-wrap/core");
 
 let mainWindow = null;
@@ -270,6 +271,29 @@ function registerIpcHandlers() {
     saveConfig(merged, targetDir);
     await personalizeGeneratedProject(targetDir, merged.appName);
     return merged;
+  });
+
+  ipcMain.handle("studio:project:setLogo", async (_event, targetDir, logoPath) => {
+    let chosen = logoPath;
+    if (!chosen) {
+      const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ["openFile"],
+        filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg"] }],
+      });
+      if (result.canceled || !result.filePaths[0]) {
+        return null;
+      }
+      chosen = result.filePaths[0];
+    }
+    await applyLogoToProject(targetDir, chosen);
+    return { success: true, logoPath: path.join(targetDir, "public", "logo.png") };
+  });
+
+  ipcMain.handle("studio:project:loadLogoDataUrl", async (_event, targetDir) => {
+    const logoFile = path.join(targetDir, "public", "logo.png");
+    if (!fs.existsSync(logoFile)) return null;
+    const buf = await fs.promises.readFile(logoFile);
+    return `data:image/png;base64,${buf.toString("base64")}`;
   });
 
   ipcMain.handle("studio:project:openInFileManager", (_event, targetPath) => {

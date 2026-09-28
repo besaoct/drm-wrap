@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld("__DRM_STUDIO__", {
     saveConfig: (targetDir, partialConfig) =>
       ipcRenderer.invoke("studio:project:saveConfig", targetDir, partialConfig),
     openInFileManager: (targetPath) => ipcRenderer.invoke("studio:project:openInFileManager", targetPath),
+    setLogo: (targetDir, logoPath) => ipcRenderer.invoke("studio:project:setLogo", targetDir, logoPath),
+    loadLogoDataUrl: (targetDir) => ipcRenderer.invoke("studio:project:loadLogoDataUrl", targetDir),
     install: (targetDir) => ipcRenderer.invoke("studio:project:install", targetDir),
     dev: (targetDir) => ipcRenderer.invoke("studio:project:dev", targetDir),
     stopDev: () => ipcRenderer.invoke("studio:project:stopDev"),

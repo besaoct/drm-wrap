@@ -119,6 +119,75 @@
     urlField.appendChild(urlInput);
     settingsCard.appendChild(urlField);
 
+    const logoField = document.createElement("div");
+    logoField.className = "field";
+    const logoLabel = document.createElement("label");
+    logoLabel.textContent = "App Icon & Logo";
+    logoField.appendChild(logoLabel);
+
+    const logoRow = document.createElement("div");
+    logoRow.className = "row";
+    logoRow.style.alignItems = "center";
+    logoRow.style.gap = "14px";
+
+    const logoImg = document.createElement("img");
+    logoImg.style.width = "44px";
+    logoImg.style.height = "44px";
+    logoImg.style.borderRadius = "8px";
+    logoImg.style.border = "1px solid var(--border)";
+    logoImg.style.background = "var(--bg)";
+    logoImg.style.objectFit = "contain";
+    logoImg.style.padding = "4px";
+
+    const refreshLogo = async () => {
+      try {
+        const dataUrl = await ctx.bridge.project.loadLogoDataUrl(targetDir);
+        if (dataUrl) {
+          logoImg.src = dataUrl;
+          logoImg.style.display = "block";
+        } else {
+          logoImg.style.display = "none";
+        }
+      } catch {
+        logoImg.style.display = "none";
+      }
+    };
+    refreshLogo();
+
+    const changeLogoBtn = document.createElement("button");
+    changeLogoBtn.className = "secondary";
+    changeLogoBtn.type = "button";
+    changeLogoBtn.textContent = "Change Icon…";
+    changeLogoBtn.style.flex = "0 0 auto";
+    changeLogoBtn.addEventListener("click", async () => {
+      try {
+        const chosen = await ctx.bridge.dialogs.chooseLogo();
+        if (!chosen) return;
+        changeLogoBtn.disabled = true;
+        changeLogoBtn.textContent = "Updating…";
+        await ctx.bridge.project.setLogo(targetDir, chosen);
+        await refreshLogo();
+        ctx.notify("App icon and logo updated successfully.", "success");
+      } catch (err) {
+        ctx.notify(err.message || String(err), "error");
+      } finally {
+        changeLogoBtn.disabled = false;
+        changeLogoBtn.textContent = "Change Icon…";
+      }
+    });
+
+    const logoHint = document.createElement("span");
+    logoHint.className = "hint";
+    logoHint.style.marginTop = "0";
+    logoHint.style.flex = "1";
+    logoHint.textContent = "Used for app window, dock icon, and built desktop installers (.icns / .png).";
+
+    logoRow.appendChild(logoImg);
+    logoRow.appendChild(changeLogoBtn);
+    logoRow.appendChild(logoHint);
+    logoField.appendChild(logoRow);
+    settingsCard.appendChild(logoField);
+
     const checkboxList = document.createElement("div");
     checkboxList.className = "checkbox-list";
     const featureInputs = {};

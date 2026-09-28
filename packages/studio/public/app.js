@@ -84,6 +84,8 @@
         loadConfig: async () => stubConfig({}),
         saveConfig: async (_targetDir, partial) => stubConfig(partial),
         openInFileManager: async () => {},
+        setLogo: async () => ({ success: true }),
+        loadLogoDataUrl: async () => null,
         install: async () => ({ started: true, task: "install" }),
         dev: async () => ({ started: true, task: "dev" }),
         stopDev: async () => ({ stopped: true }),
