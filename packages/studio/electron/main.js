@@ -81,7 +81,6 @@ function sendProcessDone(payload) {
 // closure, so it vendors more than strictly required (known tradeoff, see
 // README) in exchange for guaranteed correctness.
 const VENDOR_SKIP = new Set([
-  "typescript",
   "@types",
   ".bin",
   ".package-lock.json",
@@ -302,13 +301,26 @@ function registerIpcHandlers() {
     const config = loadConfig(targetDir);
     checkLicenseOrThrow(config.baseUrl);
     const cliPath = resolveVendoredElectronBuilderCli(targetDir);
+    const tsDir = path.join(targetDir, "node_modules", "typescript");
+    if (!fs.existsSync(tsDir)) {
+      throw new Error('Build tools (typescript) are not fully installed in this project yet. Click "Install Dependencies" first.');
+    }
     // electron-builder is a Node CLI; run it under DRMWrap's own bundled
     // Electron binary in "plain Node" mode instead of requiring a system
     // Node.js install (see ELECTRON_RUN_AS_NODE in Electron's docs).
-    return runTask("build", targetDir, process.execPath, [cliPath, "--config", "electron-builder.yml"], {
-      ELECTRON_RUN_AS_NODE: "1",
-      CSC_IDENTITY_AUTO_DISCOVERY: "false",
-    });
+    // process.defaultApp = true tells yargs not to treat the script path as an argument.
+    // ELECTRON_NO_ASAR = 1 disables Electron's asar fs interception so packaging works.
+    return runTask(
+      "build",
+      targetDir,
+      process.execPath,
+      ["-e", "process.defaultApp = true; require(process.argv[1]);", cliPath, "--config", "electron-builder.yml"],
+      {
+        ELECTRON_RUN_AS_NODE: "1",
+        ELECTRON_NO_ASAR: "1",
+        CSC_IDENTITY_AUTO_DISCOVERY: "false",
+      }
+    );
   });
 }
 
