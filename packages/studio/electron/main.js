@@ -80,7 +80,15 @@ function sendProcessDone(payload) {
 // ever invoked. This is a straight filesystem copy, not a minimal dependency
 // closure, so it vendors more than strictly required (known tradeoff, see
 // README) in exchange for guaranteed correctness.
-const VENDOR_SKIP = new Set(["typescript", "@types", ".bin", ".package-lock.json"]);
+const VENDOR_SKIP = new Set([
+  "typescript",
+  "@types",
+  ".bin",
+  ".package-lock.json",
+  "drm-wrap-desktop-app",
+  "drm-wrap-license-admin",
+  "drm-wrap-studio",
+]);
 
 function resolveVendorNodeModulesDir() {
   const electronBuilderPkgPath = require.resolve("electron-builder/package.json");
@@ -88,11 +96,17 @@ function resolveVendorNodeModulesDir() {
 }
 
 function resolveVendoredElectronPath(targetDir) {
-  const electronDir = path.join(targetDir, "node_modules", "electron");
-  if (!fs.existsSync(electronDir)) {
+  const electronPkgDir = path.join(targetDir, "node_modules", "electron");
+  const pathFile = path.join(electronPkgDir, "path.txt");
+  if (!fs.existsSync(pathFile)) {
     throw new Error('Electron is not installed in this project yet. Click "Install Dependencies" first.');
   }
-  return require(electronDir);
+  const relExe = fs.readFileSync(pathFile, "utf-8").trim();
+  const exePath = path.join(electronPkgDir, "dist", relExe);
+  if (!fs.existsSync(exePath)) {
+    throw new Error(`Electron binary not found at ${exePath}. Try clicking "Install Dependencies" again.`);
+  }
+  return exePath;
 }
 
 function resolveVendoredElectronBuilderCli(targetDir) {
@@ -110,6 +124,8 @@ function runVendorCopy(targetDir) {
   runningTask = "install";
 
   (async () => {
+    const prevNoAsar = process.noAsar;
+    process.noAsar = true;
     try {
       const sourceNodeModules = resolveVendorNodeModulesDir();
       const destNodeModules = path.join(targetDir, "node_modules");
@@ -117,11 +133,39 @@ function runVendorCopy(targetDir) {
       const entries = await fsExtra.readdir(sourceNodeModules);
 
       for (const entry of entries) {
-        if (VENDOR_SKIP.has(entry)) continue;
+        if (VENDOR_SKIP.has(entry) || entry.startsWith("drm-wrap-") || entry.startsWith(".")) continue;
         sendLog("install", "stdout", `Vendoring ${entry}...\n`);
+        const isElectron = entry === "electron";
         await fsExtra.copy(path.join(sourceNodeModules, entry), path.join(destNodeModules, entry), {
-          dereference: true,
+          dereference: !isElectron,
         });
+      }
+
+      if (process.platform === "darwin" || process.platform === "linux") {
+        try {
+          const pathFile = path.join(destNodeModules, "electron", "path.txt");
+          if (fs.existsSync(pathFile)) {
+            const relExe = fs.readFileSync(pathFile, "utf-8").trim();
+            const exePath = path.join(destNodeModules, "electron", "dist", relExe);
+            if (fs.existsSync(exePath)) {
+              fs.chmodSync(exePath, 0o755);
+            }
+          }
+        } catch {}
+      }
+
+      if (process.platform === "darwin") {
+        const destElectronApp = path.join(destNodeModules, "electron", "dist", "Electron.app");
+        if (fs.existsSync(destElectronApp)) {
+          sendLog("install", "stdout", "Configuring macOS permissions for Electron...\n");
+          try {
+            const { execFileSync } = require("node:child_process");
+            execFileSync("xattr", ["-cr", destElectronApp], { stdio: "ignore" });
+            execFileSync("codesign", ["--force", "--deep", "--sign", "-", destElectronApp], { stdio: "ignore" });
+          } catch (e) {
+            sendLog("install", "stdout", `Note: ad-hoc signing info: ${e.message}\n`);
+          }
+        }
       }
 
       sendLog("install", "stdout", "Done — electron, electron-builder, and drm-wrap are ready in this project.\n");
@@ -131,6 +175,8 @@ function runVendorCopy(targetDir) {
       runningTask = null;
       sendLog("install", "stderr", `${error.message || error}\n`);
       sendProcessDone({ task: "install", success: false, code: null, error: error.message });
+    } finally {
+      process.noAsar = prevNoAsar;
     }
   })();
 
