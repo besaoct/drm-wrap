@@ -397,6 +397,20 @@
 
     function renderArtifacts(artifacts) {
       artifactsContainer.innerHTML = "";
+
+      const tip = document.createElement("div");
+      tip.style.fontSize = "12px";
+      tip.style.color = "var(--text-muted)";
+      tip.style.marginBottom = "10px";
+      tip.style.padding = "10px 14px";
+      tip.style.background = "var(--bg-card)";
+      tip.style.border = "1px solid var(--border)";
+      tip.style.borderRadius = "var(--radius)";
+      tip.style.lineHeight = "1.5";
+      tip.innerHTML =
+        '<strong>macOS Security Tip:</strong> Local builds are automatically ad-hoc signed and unquarantined. If macOS Sequoia blocks an app extracted from a DMG, click <em>Unquarantine</em> or run the unpacked <code>.app</code> in <code>release/mac-universal/</code>.';
+      artifactsContainer.appendChild(tip);
+
       artifacts.forEach(function (artifactPath) {
         const item = document.createElement("div");
         item.className = "list-item";
@@ -410,6 +424,42 @@
         left.appendChild(name);
         left.appendChild(meta);
 
+        const actions = document.createElement("div");
+        actions.style.display = "flex";
+        actions.style.gap = "8px";
+
+        if (artifactPath.endsWith(".app")) {
+          const openBtn = document.createElement("button");
+          openBtn.className = "secondary";
+          openBtn.textContent = "Open App";
+          openBtn.addEventListener("click", async function () {
+            try {
+              await ctx.bridge.project.openInFileManager(artifactPath);
+            } catch (error) {
+              ctx.notify(error.message, "error");
+            }
+          });
+          actions.appendChild(openBtn);
+        }
+
+        const unqBtn = document.createElement("button");
+        unqBtn.className = "secondary";
+        unqBtn.textContent = "Unquarantine";
+        unqBtn.title = "Clear quarantine attribute and verify ad-hoc signature";
+        unqBtn.addEventListener("click", async function () {
+          try {
+            const res = await ctx.bridge.project.unquarantine(artifactPath);
+            if (res && res.success) {
+              ctx.notify("Quarantine cleared & ad-hoc signature applied! Ready to launch.", "success");
+            } else {
+              ctx.notify("Could not unquarantine path.", "error");
+            }
+          } catch (error) {
+            ctx.notify(error.message, "error");
+          }
+        });
+        actions.appendChild(unqBtn);
+
         const revealBtn = document.createElement("button");
         revealBtn.className = "secondary";
         revealBtn.textContent = "Reveal";
@@ -420,9 +470,10 @@
             ctx.notify(error.message, "error");
           }
         });
+        actions.appendChild(revealBtn);
 
         item.appendChild(left);
-        item.appendChild(revealBtn);
+        item.appendChild(actions);
         artifactsContainer.appendChild(item);
       });
     }

@@ -1,7 +1,7 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const fsExtra = require("fs-extra");
-const { spawn } = require("node:child_process");
+const { spawn, execFileSync } = require("node:child_process");
 const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require("electron");
 const {
   getActiveLicense,
@@ -48,7 +48,11 @@ function listReleaseArtifacts(targetDir) {
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        walk(fullPath);
+        if (entry.name.endsWith(".app")) {
+          results.push(fullPath);
+        } else {
+          walk(fullPath);
+        }
       } else if (extensions.has(path.extname(entry.name).toLowerCase())) {
         results.push(fullPath);
       }
@@ -57,6 +61,58 @@ function listReleaseArtifacts(targetDir) {
 
   walk(releaseDir);
   return results;
+}
+
+function postProcessMacReleaseArtifacts(targetDir) {
+  if (process.platform !== "darwin") return;
+  const releaseDir = path.join(targetDir, "release");
+  if (!fs.existsSync(releaseDir)) return;
+
+  function walk(dir) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name.endsWith(".app")) {
+          try {
+            // Strip quarantine flag and apply valid ad-hoc signature so macOS Gatekeeper / XProtect allows local launch
+            execFileSync("xattr", ["-cr", fullPath], { stdio: "ignore" });
+            execFileSync("codesign", ["--force", "--deep", "--sign", "-", fullPath], { stdio: "ignore" });
+            sendLog("build", "stdout", `✓ Ad-hoc signed & unquarantined for local macOS launch: ${entry.name}\n`);
+          } catch (err) {
+            sendLog("build", "stderr", `Notice: Ad-hoc signing ${entry.name}: ${err.message}\n`);
+          }
+        } else {
+          walk(fullPath);
+        }
+      } else if (entry.name.endsWith(".dmg") || entry.name.endsWith(".zip")) {
+        try {
+          execFileSync("xattr", ["-cr", fullPath], { stdio: "ignore" });
+        } catch {}
+      }
+    }
+  }
+
+  walk(releaseDir);
+}
+
+function unquarantinePath(targetPath) {
+  if (process.platform !== "darwin") return false;
+  if (!fs.existsSync(targetPath)) return false;
+  try {
+    execFileSync("xattr", ["-cr", targetPath], { stdio: "ignore" });
+    if (targetPath.endsWith(".app")) {
+      execFileSync("codesign", ["--force", "--deep", "--sign", "-", targetPath], { stdio: "ignore" });
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function sendLog(task, stream, data) {
@@ -214,6 +270,9 @@ function runTask(task, cwd, command, args, extraEnv = {}) {
   const finish = (payload) => {
     runningProcess = null;
     runningTask = null;
+    if (task === "build" && payload.success) {
+      postProcessMacReleaseArtifacts(cwd);
+    }
     const artifacts = task === "build" && payload.success ? listReleaseArtifacts(cwd) : undefined;
     sendProcessDone({ task, ...payload, artifacts });
   };
@@ -338,13 +397,35 @@ function registerIpcHandlers() {
       "build",
       targetDir,
       process.execPath,
-      ["-e", "process.defaultApp = true; require(process.argv[1]);", cliPath, "--config", "electron-builder.yml"],
+      [
+        "-e",
+        "process.defaultApp = true; require(process.argv[1]);",
+        cliPath,
+        "--config",
+        "electron-builder.yml",
+        "-c.mac.hardenedRuntime=false",
+        "-c.mac.identity=null",
+      ],
       {
         ELECTRON_RUN_AS_NODE: "1",
         ELECTRON_NO_ASAR: "1",
         CSC_IDENTITY_AUTO_DISCOVERY: "false",
       }
     );
+  });
+
+  ipcMain.handle("studio:project:unquarantine", async (_event, targetPath) => {
+    let chosen = targetPath;
+    if (!chosen) {
+      const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ["openFile"],
+        filters: [{ name: "Applications & Installers", extensions: ["app", "dmg", "zip"] }],
+      });
+      if (result.canceled || !result.filePaths[0]) return null;
+      chosen = result.filePaths[0];
+    }
+    const success = unquarantinePath(chosen);
+    return { success, path: chosen };
   });
 }
 

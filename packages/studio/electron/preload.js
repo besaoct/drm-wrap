@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld("__DRM_STUDIO__", {
     dev: (targetDir) => ipcRenderer.invoke("studio:project:dev", targetDir),
     stopDev: () => ipcRenderer.invoke("studio:project:stopDev"),
     build: (targetDir) => ipcRenderer.invoke("studio:project:build", targetDir),
+    unquarantine: (targetPath) => ipcRenderer.invoke("studio:project:unquarantine", targetPath),
   },
 
   onLog: (callback) => subscribe("studio:log", callback),

@@ -16,13 +16,8 @@ asar: true
 mac:
   category: public.app-category.business
   icon: public/logo.icns
-  hardenedRuntime: true
   minimumSystemVersion: "12.0"
-  entitlements: build/entitlements.mac.plist
-  entitlementsInherit: build/entitlements.mac.inherit.plist
   gatekeeperAssess: false
-  notarize:
-    teamId: "63LNPXAB49"
   target:
     - target: dmg
       arch:

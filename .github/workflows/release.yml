@@ -82,8 +82,13 @@ jobs:
             echo "Notice: APPLE_APP_SPECIFIC_PASSWORD is not set in secrets; skipping Apple Notarization."
           fi
           
-          npm run package --workspace=drm-wrap-desktop-app -- --publish never
-          npm run package --workspace=drm-wrap-studio -- --publish never
+          EXTRA_MAC_OPTS="-c.mac.hardenedRuntime=true -c.mac.entitlements=build/entitlements.mac.plist -c.mac.entitlementsInherit=build/entitlements.mac.inherit.plist"
+          if [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ]; then
+            EXTRA_MAC_OPTS="$EXTRA_MAC_OPTS -c.mac.notarize.teamId=${{ secrets.APPLE_TEAM_ID || '63LNPXAB49' }}"
+          fi
+          
+          npm run package --workspace=drm-wrap-desktop-app -- --publish never $EXTRA_MAC_OPTS
+          npm run package --workspace=drm-wrap-studio -- --publish never $EXTRA_MAC_OPTS
         env:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || '63LNPXAB49' }}

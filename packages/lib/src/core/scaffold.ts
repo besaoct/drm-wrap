@@ -46,6 +46,12 @@ export async function personalizeGeneratedProject(targetDir: string, appName: st
     let contents = await fs.readFile(builderConfigPath, "utf8");
     contents = contents.replace(/^appId: .*$/m, `appId: com.drmwrap.${slug}`);
     contents = contents.replace(/^productName: .*$/m, `productName: ${appName}`);
+    // Strip hardenedRuntime, entitlements, and notarize from local builder configs
+    // to prevent macOS Sequoia Gatekeeper from falsely classifying local unsigned builds as malware
+    contents = contents.replace(/^\s*hardenedRuntime:\s*true\s*[\r\n]*/gm, "");
+    contents = contents.replace(/^\s*entitlements:\s*.*[\r\n]*/gm, "");
+    contents = contents.replace(/^\s*entitlementsInherit:\s*.*[\r\n]*/gm, "");
+    contents = contents.replace(/^\s*notarize:\s*[\r\n]+(\s+.*\S+[\r\n]+)*/gm, "");
     await fs.writeFile(builderConfigPath, contents, "utf8");
   }
 }
