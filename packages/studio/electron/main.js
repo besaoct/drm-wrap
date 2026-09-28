@@ -117,6 +117,16 @@ function resolveVendoredElectronBuilderCli(targetDir) {
   return cliPath;
 }
 
+function checkVendoredDependenciesReady(targetDir) {
+  const nodeModulesDir = path.join(targetDir, "node_modules");
+  const electronDir = path.join(nodeModulesDir, "electron");
+  const coreDir = path.join(nodeModulesDir, "@besaoct", "drm-wrap");
+  const zodDir = path.join(nodeModulesDir, "zod");
+  if (!fs.existsSync(electronDir) || !fs.existsSync(coreDir) || !fs.existsSync(zodDir)) {
+    throw new Error('Dependencies are not installed in this project yet. Click "Install Dependencies" first.');
+  }
+}
+
 function runVendorCopy(targetDir) {
   if (runningProcess || runningTask) {
     throw new Error(`A "${runningTask}" task is already running.`);
@@ -136,7 +146,9 @@ function runVendorCopy(targetDir) {
         if (VENDOR_SKIP.has(entry) || entry.startsWith("drm-wrap-") || entry.startsWith(".")) continue;
         sendLog("install", "stdout", `Vendoring ${entry}...\n`);
         const isElectron = entry === "electron";
-        await fsExtra.copy(path.join(sourceNodeModules, entry), path.join(destNodeModules, entry), {
+        const targetEntryPath = path.join(destNodeModules, entry);
+        await fsExtra.remove(targetEntryPath);
+        await fsExtra.copy(path.join(sourceNodeModules, entry), targetEntryPath, {
           dereference: !isElectron,
         });
       }
@@ -273,6 +285,7 @@ function registerIpcHandlers() {
   ipcMain.handle("studio:project:install", (_event, targetDir) => runVendorCopy(targetDir));
 
   ipcMain.handle("studio:project:dev", (_event, targetDir) => {
+    checkVendoredDependenciesReady(targetDir);
     const electronBinary = resolveVendoredElectronPath(targetDir);
     return runTask("dev", targetDir, electronBinary, ["."], { NODE_ENV: "development" });
   });
