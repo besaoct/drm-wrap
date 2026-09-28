@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "node node_modules/electron/install.js",
+    "postinstall": "node node_modules/electron/install.js && (xattr -cr node_modules/electron/dist/Electron.app 2>/dev/null || true) && (codesign --force --deep --sign - node_modules/electron/dist/Electron.app 2>/dev/null || true)",
     "build": "npm run build --workspace=@besaoct/drm-wrap",
     "dev": "npm run dev --workspace=drm-wrap-desktop-app",
     "dev:studio": "npm run dev --workspace=drm-wrap-studio",
