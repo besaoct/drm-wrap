@@ -3,11 +3,21 @@ import { IPC_CHANNELS } from "../ipc-channels";
 import type { BlankSignal, DataDrmLevel, DetectionEvent } from "../types";
 
 export function sendBlankSignal(target: BrowserWindow, signal: BlankSignal): void {
-  target.webContents.send(IPC_CHANNELS.BLANK_ELEMENTS, signal);
+  if (!target || target.isDestroyed()) return;
+  const wc = target.webContents;
+  if (!wc || wc.isDestroyed()) return;
+  try {
+    wc.send(IPC_CHANNELS.BLANK_ELEMENTS, signal);
+  } catch {}
 }
 
 export function sendUnblankSignal(target: BrowserWindow, level: DataDrmLevel | "all"): void {
-  target.webContents.send(IPC_CHANNELS.UNBLANK_ELEMENTS, { level });
+  if (!target || target.isDestroyed()) return;
+  const wc = target.webContents;
+  if (!wc || wc.isDestroyed()) return;
+  try {
+    wc.send(IPC_CHANNELS.UNBLANK_ELEMENTS, { level });
+  } catch {}
 }
 
 export function blankSignalForDetection(event: DetectionEvent): BlankSignal {

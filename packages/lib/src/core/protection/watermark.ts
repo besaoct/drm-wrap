@@ -15,7 +15,18 @@ export function getWatermarkPayload(config: DrmConfig, identity: string): Waterm
 }
 
 export function sendWatermarkUpdate(target: BrowserWindow, payload: WatermarkPayload): void {
-  target.webContents.send(IPC_CHANNELS.UPDATE_WATERMARK, payload);
+  if (!target || target.isDestroyed()) {
+    return;
+  }
+  const wc = target.webContents;
+  if (!wc || wc.isDestroyed()) {
+    return;
+  }
+  try {
+    wc.send(IPC_CHANNELS.UPDATE_WATERMARK, payload);
+  } catch {
+    // Window or webContents destroyed concurrently
+  }
 }
 
 export function startWatermarkRefresh(
@@ -24,11 +35,41 @@ export function startWatermarkRefresh(
   identity: string,
   intervalMs = 15000
 ): () => void {
+  if (!target || target.isDestroyed()) {
+    return () => {};
+  }
+
   sendWatermarkUpdate(target, getWatermarkPayload(config, identity));
 
-  const interval = setInterval(() => {
+  let cleanedUp = false;
+  let interval: NodeJS.Timeout | null = null;
+
+  const cleanup = () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    if (interval !== null) {
+      clearInterval(interval);
+      interval = null;
+    }
+  };
+
+  interval = setInterval(() => {
+    if (cleanedUp || !target || target.isDestroyed()) {
+      cleanup();
+      return;
+    }
+    const wc = target.webContents;
+    if (!wc || wc.isDestroyed()) {
+      cleanup();
+      return;
+    }
     sendWatermarkUpdate(target, getWatermarkPayload(config, identity));
   }, intervalMs);
 
-  return () => clearInterval(interval);
+  if (!target.isDestroyed()) {
+    target.once("close", cleanup);
+    target.once("closed", cleanup);
+  }
+
+  return cleanup;
 }

@@ -186,19 +186,38 @@ class DrmWrapRuntime {
     }
 
     logEvent(`${event.type} ${event.category} via ${event.method} (${event.signatureId ?? "n/a"})`);
-    if (!this.win.isDestroyed()) {
-      this.win.webContents.send(IPC_CHANNELS.DETECTION_EVENT, event);
+    if (!this.win.isDestroyed() && this.win.webContents && !this.win.webContents.isDestroyed()) {
+      try {
+        this.win.webContents.send(IPC_CHANNELS.DETECTION_EVENT, event);
+      } catch {}
     }
   }
 
   teardown() {
-    this.detectionEngine?.stop();
-    this.detectionEngine?.removeAllListeners();
-    this.stopWatermark?.();
-    this.hotkeyCleanup?.();
-    this.invisibleModeManager?.destroy();
-    this.invisibleModeManager?.removeAllListeners();
-    this.tray?.destroy();
+    try {
+      this.detectionEngine?.stop();
+      this.detectionEngine?.removeAllListeners();
+    } catch {}
+    if (typeof this.stopWatermark === "function") {
+      try {
+        this.stopWatermark();
+      } catch {}
+      this.stopWatermark = null;
+    }
+    if (typeof this.hotkeyCleanup === "function") {
+      try {
+        this.hotkeyCleanup();
+      } catch {}
+      this.hotkeyCleanup = null;
+    }
+    try {
+      this.invisibleModeManager?.destroy();
+      this.invisibleModeManager?.removeAllListeners();
+    } catch {}
+    try {
+      this.tray?.destroy();
+    } catch {}
+    this.tray = null;
     this.activeKeys.clear();
   }
 
@@ -230,19 +249,30 @@ class DrmWrapRuntime {
       });
       this.invisibleModeManager.registerHotkey();
       this.invisibleModeManager.on("change", (state) => {
-        if (!this.win.isDestroyed()) {
-          this.win.webContents.send(IPC_CHANNELS.INVISIBLE_STATE, state);
+        if (!this.win.isDestroyed() && this.win.webContents && !this.win.webContents.isDestroyed()) {
+          try {
+            this.win.webContents.send(IPC_CHANNELS.INVISIBLE_STATE, state);
+          } catch {}
         }
         logEvent(`invisible-mode ${state.active ? "on" : "off"} (${state.reason ?? "n/a"})`);
       });
       this.tray = createTray(this.win, this.invisibleModeManager);
     }
 
-    if (!this.win.isDestroyed()) {
-      this.win.webContents.send(IPC_CHANNELS.CONFIG_UPDATED, config);
+    if (!this.win.isDestroyed() && this.win.webContents && !this.win.webContents.isDestroyed()) {
+      try {
+        this.win.webContents.send(IPC_CHANNELS.CONFIG_UPDATED, config);
+      } catch {}
     }
   }
 }
+
+process.on("uncaughtException", (error) => {
+  if (error && (error.message?.includes("Object has been destroyed") || error.message?.includes("webContents"))) {
+    return;
+  }
+  console.error("Uncaught Exception:", error);
+});
 
 app.whenReady().then(() => {
   const config = loadConfig(APP_ROOT);
@@ -266,12 +296,21 @@ app.whenReady().then(() => {
     applyContentProtection(win, !!enabled);
   });
 
-  const stopWatchingConfig = watchConfig((updatedConfig) => runtime.apply(updatedConfig), APP_ROOT);
+  const stopWatchingConfig = watchConfig((updatedConfig) => {
+    if (!win.isDestroyed()) {
+      runtime.apply(updatedConfig);
+    }
+  }, APP_ROOT);
 
-  win.on("closed", () => {
-    stopWatchingConfig();
+  const cleanupOnClose = () => {
+    try {
+      stopWatchingConfig();
+    } catch {}
     runtime.teardown();
-  });
+  };
+
+  win.on("close", cleanupOnClose);
+  win.on("closed", cleanupOnClose);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -283,9 +322,7 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  app.quit();
 });
 
 app.on("will-quit", () => {

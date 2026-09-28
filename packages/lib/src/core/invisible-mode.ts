@@ -35,6 +35,7 @@ export class InvisibleModeManager extends EventEmitter {
   }
 
   enable(reason: InvisibleModeState["reason"] = "manual"): void {
+    if (!this.win || this.win.isDestroyed()) return;
     applyContentProtection(this.win, true);
     this.currentState = {
       active: true,
@@ -45,6 +46,7 @@ export class InvisibleModeManager extends EventEmitter {
   }
 
   disable(): void {
+    if (!this.win || this.win.isDestroyed()) return;
     applyContentProtection(this.win, false);
     this.currentState = { active: false, auto: false };
     this.emit("change", this.state);
