@@ -10,18 +10,14 @@ const {
   Menu,
   nativeImage,
 } = require("electron");
-const {
-  IPC_CHANNELS,
-  loadConfig,
-  watchConfig,
-  applyContentProtection,
-  sendBlankSignal,
-  sendUnblankSignal,
-  startWatermarkRefresh,
-  DetectionEngine,
-  InvisibleModeManager,
-  signatureDatabase,
-} = require("@besaoct/drm-wrap/core");
+const { IPC_CHANNELS } = require("./ipc-channels");
+const { loadConfig, watchConfig } = require("./config");
+const { applyContentProtection } = require("./protection/content-protection");
+const { sendBlankSignal, sendUnblankSignal } = require("./protection/overlay");
+const { startWatermarkRefresh } = require("./protection/watermark");
+const { DetectionEngine } = require("./detection/engine");
+const { InvisibleModeManager } = require("./invisible-mode");
+const signatureDatabase = require("./detection/signatures.json");
 
 const APP_ROOT = app.getAppPath();
 const LOG_PATH = path.join(app.getPath("userData"), "drm-wrap.log");

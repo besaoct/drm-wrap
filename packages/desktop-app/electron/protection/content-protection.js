@@ -1,4 +1,12 @@
-// See electron/detection/engine.js for why this is a thin re-export.
-const { applyContentProtection, isContentProtectionSupported } = require("@besaoct/drm-wrap/core");
+function applyContentProtection(win, enabled) {
+  if (!win || win.isDestroyed()) return;
+  try {
+    win.setContentProtection(Boolean(enabled));
+  } catch {}
+}
+
+function isContentProtectionSupported() {
+  return process.platform === "win32" || process.platform === "darwin";
+}
 
 module.exports = { applyContentProtection, isContentProtectionSupported };

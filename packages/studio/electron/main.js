@@ -143,20 +143,21 @@ function resolveVendoredElectronPath(targetDir) {
 }
 
 function resolveVendoredElectronBuilderCli(targetDir) {
-  const cliPath = path.join(targetDir, "node_modules", "electron-builder", "cli.js");
-  if (!fs.existsSync(cliPath)) {
-    throw new Error('electron-builder is not installed in this project yet. Click "Install Dependencies" first.');
+  const localCli = path.join(targetDir, "node_modules", "electron-builder", "cli.js");
+  if (fs.existsSync(localCli)) {
+    return localCli;
   }
-  return cliPath;
+  try {
+    return require.resolve("electron-builder/cli.js");
+  } catch {
+    throw new Error('electron-builder CLI not found. Please click "Install Dependencies" first.');
+  }
 }
 
 function checkVendoredDependenciesReady(targetDir) {
-  const nodeModulesDir = path.join(targetDir, "node_modules");
-  const electronDir = path.join(nodeModulesDir, "electron");
-  const coreDir = path.join(nodeModulesDir, "@besaoct", "drm-wrap");
-  const zodDir = path.join(nodeModulesDir, "zod");
-  if (!fs.existsSync(electronDir) || !fs.existsSync(coreDir) || !fs.existsSync(zodDir)) {
-    throw new Error('Dependencies are not installed in this project yet. Click "Install Dependencies" first.');
+  const mainJs = path.join(targetDir, "electron", "main.js");
+  if (!fs.existsSync(mainJs)) {
+    throw new Error('Invalid project: electron/main.js was not found in this project.');
   }
 }
 
@@ -366,8 +367,12 @@ function registerIpcHandlers() {
 
   ipcMain.handle("studio:project:dev", (_event, targetDir) => {
     checkVendoredDependenciesReady(targetDir);
-    const electronBinary = resolveVendoredElectronPath(targetDir);
-    return runTask("dev", targetDir, electronBinary, ["."], { NODE_ENV: "development" });
+    let electronBinary = process.execPath;
+    try {
+      const local = resolveVendoredElectronPath(targetDir);
+      if (fs.existsSync(local)) electronBinary = local;
+    } catch {}
+    return runTask("dev", targetDir, electronBinary, [targetDir], { NODE_ENV: "development" });
   });
 
   ipcMain.handle("studio:project:stopDev", () => {
@@ -382,10 +387,6 @@ function registerIpcHandlers() {
     const config = loadConfig(targetDir);
     checkLicenseOrThrow(config.baseUrl);
     const cliPath = resolveVendoredElectronBuilderCli(targetDir);
-    const tsDir = path.join(targetDir, "node_modules", "typescript");
-    if (!fs.existsSync(tsDir)) {
-      throw new Error('Build tools (typescript) are not fully installed in this project yet. Click "Install Dependencies" first.');
-    }
     // electron-builder is a Node CLI; run it under DRMWrap's own bundled
     // Electron binary in "plain Node" mode instead of requiring a system
     // Node.js install (see ELECTRON_RUN_AS_NODE in Electron's docs).

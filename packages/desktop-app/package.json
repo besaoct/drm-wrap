@@ -1,6 +1,6 @@
 {
   "name": "drm-wrap-desktop-app",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "description": "DRM-Wrap generated Electron desktop app template (also doubles as the monorepo's live dev/demo app).",
   "author": "besaoct",
@@ -10,9 +10,7 @@
     "start": "electron .",
     "package": "electron-builder --config electron-builder.yml"
   },
-  "dependencies": {
-    "@besaoct/drm-wrap": "^1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "cross-env": "^7.0.3",
     "electron": "^31.3.0",
