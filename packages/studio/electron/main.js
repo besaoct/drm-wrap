@@ -1,5 +1,6 @@
 const path = require("node:path");
 const fs = require("node:fs");
+const os = require("node:os");
 const fsExtra = require("fs-extra");
 const { spawn, execFileSync } = require("node:child_process");
 const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require("electron");
@@ -127,100 +128,123 @@ function sendProcessDone(payload) {
   }
 }
 
-// DRMWrap ships electron + electron-builder (and their full dep trees) as
-// production dependencies so electron-builder bundles them in the packaged
-// app. Combined with asarUnpack: ["node_modules/**/*"] in electron-builder.yml,
-// they land as real directories at:
-//   <app>/Contents/Resources/app.asar.unpacked/node_modules/
-// The vendor-copy reads from there (real fs) and writes to the user's project
-// — no system npm/node required at any point.
-const VENDOR_SKIP = new Set([
-  "@types",
-  ".bin",
-  ".package-lock.json",
-  "drm-wrap-desktop-app",
-  "drm-wrap-license-admin",
-  "drm-wrap-studio",
-]);
-
-function resolveVendorNodeModulesDir() {
-  // When packaged: asarUnpack places node_modules as real dirs in:
-  //   <resourcesPath>/app.asar.unpacked/node_modules/
-  if (app.isPackaged && process.resourcesPath) {
-    const unpacked = path.join(
-      process.resourcesPath,
-      "app.asar.unpacked",
-      "node_modules"
-    );
-    if (fs.existsSync(path.join(unpacked, "electron-builder", "package.json"))) {
-      return unpacked;
-    }
+function resolveVendoredElectronPath(targetDir) {
+  const electronPkgDir = path.join(targetDir, "node_modules", "electron");
+  const pathFile = path.join(electronPkgDir, "path.txt");
+  if (!fs.existsSync(pathFile)) {
+    throw new Error('Electron is not installed in this project yet. Click "Install Dependencies" first.');
   }
-  // Dev/monorepo fallback: resolve via require (ASAR-patched, works unpackaged)
-  const electronBuilderPkgPath = require.resolve("electron-builder/package.json");
-  return path.dirname(path.dirname(electronBuilderPkgPath));
+  const relExe = fs.readFileSync(pathFile, "utf-8").trim();
+  const exePath = path.join(electronPkgDir, "dist", relExe);
+  if (!fs.existsSync(exePath)) {
+    throw new Error(`Electron binary not found at ${exePath}. Try clicking "Install Dependencies" again.`);
+  }
+  return exePath;
 }
 
-function runVendorCopy(targetDir) {
+function resolveVendoredElectronBuilderCli(targetDir) {
+  const cliPath = path.join(targetDir, "node_modules", "electron-builder", "cli.js");
+  if (!fs.existsSync(cliPath)) {
+    throw new Error('electron-builder is not installed in this project yet. Click "Install Dependencies" first.');
+  }
+  return cliPath;
+}
+
+function checkVendoredDependenciesReady(targetDir) {
+  const nodeModulesDir = path.join(targetDir, "node_modules");
+  const electronDir = path.join(nodeModulesDir, "electron");
+  const coreDir = path.join(nodeModulesDir, "@besaoct", "drm-wrap");
+  const zodDir = path.join(nodeModulesDir, "zod");
+  if (!fs.existsSync(electronDir) || !fs.existsSync(coreDir) || !fs.existsSync(zodDir)) {
+    throw new Error('Dependencies are not installed in this project yet. Click "Install Dependencies" first.');
+  }
+}
+
+function getExtendedEnv() {
+  const currentPath = process.env.PATH || "";
+  const sep = process.platform === "win32" ? ";" : ":";
+  const extraPaths =
+    process.platform === "darwin"
+      ? [
+          "/usr/local/bin",
+          "/opt/homebrew/bin",
+          "/opt/homebrew/sbin",
+          path.join(os.homedir(), ".nvm/versions/node/v20/bin"),
+          path.join(os.homedir(), ".nvm/versions/node/v22/bin"),
+        ]
+      : process.platform === "win32"
+      ? [
+          "C:\\Program Files\\nodejs",
+          path.join(os.homedir(), "AppData\\Roaming\\npm"),
+        ]
+      : ["/usr/local/bin", "/usr/bin", "/bin"];
+
+  return {
+    ...process.env,
+    PATH: `${extraPaths.join(sep)}${sep}${currentPath}`,
+    FORCE_COLOR: "1",
+    ELECTRON_RUN_AS_NODE: "",
+  };
+}
+
+function runNpmInstall(targetDir) {
   if (runningProcess || runningTask) {
     throw new Error(`A "${runningTask}" task is already running.`);
   }
   runningTask = "install";
 
-  (async () => {
-    try {
-      // Source is app.asar.unpacked/node_modules/ — real directories on disk.
-      // No process.noAsar needed; fsExtra.copy works normally on real fs.
-      const sourceNodeModules = resolveVendorNodeModulesDir();
-      const destNodeModules = path.join(targetDir, "node_modules");
-      await fsExtra.ensureDir(destNodeModules);
-      const entries = await fsExtra.readdir(sourceNodeModules);
+  // Use shell: true so npm is resolved from the augmented PATH on all platforms
+  const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+  const child = spawn(npmCmd, ["install", "--no-audit", "--no-fund", "--prefer-offline"], {
+    cwd: targetDir,
+    shell: true,
+    env: getExtendedEnv(),
+  });
+  runningProcess = child;
 
-      for (const entry of entries) {
-        if (VENDOR_SKIP.has(entry) || entry.startsWith("drm-wrap-") || entry.startsWith(".")) continue;
-        sendLog("install", "stdout", `Vendoring ${entry}...\n`);
-        const isElectron = entry === "electron";
-        const targetEntryPath = path.join(destNodeModules, entry);
-        await fsExtra.remove(targetEntryPath);
-        await fsExtra.copy(path.join(sourceNodeModules, entry), targetEntryPath, {
-          dereference: !isElectron,
-        });
-      }
+  child.stdout?.on("data", (data) => sendLog("install", "stdout", data));
+  child.stderr?.on("data", (data) => sendLog("install", "stderr", data));
 
-      if (process.platform === "darwin" || process.platform === "linux") {
+  const finishInstall = (code, error) => {
+    runningProcess = null;
+    runningTask = null;
+
+    if (code === 0) {
+      // On macOS: ad-hoc codesign the downloaded Electron binary so
+      // Preview App works without Gatekeeper quarantine issues.
+      if (process.platform === "darwin") {
         try {
+          const { execFileSync } = require("node:child_process");
+          const destNodeModules = path.join(targetDir, "node_modules");
           const pathFile = path.join(destNodeModules, "electron", "path.txt");
           if (fs.existsSync(pathFile)) {
             const relExe = fs.readFileSync(pathFile, "utf-8").trim();
             const exePath = path.join(destNodeModules, "electron", "dist", relExe);
-            if (fs.existsSync(exePath)) fs.chmodSync(exePath, 0o755);
+            const electronApp = path.join(destNodeModules, "electron", "dist", "Electron.app");
+            sendLog("install", "stdout", "Configuring macOS permissions for Electron...\n");
+            if (fs.existsSync(electronApp)) {
+              execFileSync("xattr", ["-cr", electronApp], { stdio: "ignore" });
+              execFileSync("codesign", ["--force", "--deep", "--sign", "-", electronApp], { stdio: "ignore" });
+            } else if (fs.existsSync(exePath)) {
+              fs.chmodSync(exePath, 0o755);
+              execFileSync("codesign", ["--force", "--sign", "-", exePath], { stdio: "ignore" });
+            }
           }
-        } catch {}
-      }
-
-      if (process.platform === "darwin") {
-        const destElectronApp = path.join(destNodeModules, "electron", "dist", "Electron.app");
-        if (fs.existsSync(destElectronApp)) {
-          sendLog("install", "stdout", "Configuring macOS permissions for Electron...\n");
-          try {
-            const { execFileSync } = require("node:child_process");
-            execFileSync("xattr", ["-cr", destElectronApp], { stdio: "ignore" });
-            execFileSync("codesign", ["--force", "--deep", "--sign", "-", destElectronApp], { stdio: "ignore" });
-          } catch (e) {
-            sendLog("install", "stdout", `Note: ad-hoc signing: ${e.message}\n`);
-          }
+        } catch (e) {
+          sendLog("install", "stdout", `Note: ad-hoc signing skipped: ${e.message}\n`);
         }
       }
-
-      sendLog("install", "stdout", "Done — electron, electron-builder, and drm-wrap are ready in this project.\n");
-      runningTask = null;
+      sendLog("install", "stdout", "Done — dependencies installed successfully.\n");
       sendProcessDone({ task: "install", success: true, code: 0 });
-    } catch (error) {
-      runningTask = null;
-      sendLog("install", "stderr", `${error.message || error}\n`);
-      sendProcessDone({ task: "install", success: false, code: null, error: error.message });
+    } else {
+      const msg = error ? error.message : `npm install exited with code ${code}.`;
+      sendLog("install", "stderr", `${msg}\n`);
+      sendProcessDone({ task: "install", success: false, code, error: msg });
     }
-  })();
+  };
+
+  child.on("close", (code) => finishInstall(code, null));
+  child.on("error", (err) => finishInstall(null, err));
 
   return { started: true, task: "install" };
 }
@@ -234,7 +258,7 @@ function runTask(task, cwd, command, args, extraEnv = {}) {
   const child = spawn(command, args, {
     cwd,
     shell: process.platform === "win32",
-    env: { ...process.env, ...extraEnv },
+    env: { ...getExtendedEnv(), ...extraEnv },
   });
   runningProcess = child;
 
@@ -338,7 +362,7 @@ function registerIpcHandlers() {
     }
   });
 
-  ipcMain.handle("studio:project:install", (_event, targetDir) => runVendorCopy(targetDir));
+  ipcMain.handle("studio:project:install", (_event, targetDir) => runNpmInstall(targetDir));
 
   ipcMain.handle("studio:project:dev", (_event, targetDir) => {
     checkVendoredDependenciesReady(targetDir);

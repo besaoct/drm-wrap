@@ -273,7 +273,7 @@
     buildCard.appendChild(
       actionField(
         "Install Dependencies",
-        "Copies DRMWrap's built-in Electron and build tools into this project — no separate Node.js or npm install needed.",
+        "Installs the required Electron runtime and build tools for this project via npm.",
         installBtn
       )
     );
