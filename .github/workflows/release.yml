@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. v1.0.2)'
+        description: 'Release version (e.g. v1.0.3)'
         required: true
-        default: 'v1.0.2'
+        default: 'v1.0.3'
 
 permissions:
   contents: write
@@ -47,18 +47,17 @@ jobs:
       - name: Build Core Engine & Packages
         run: npm run build
 
-      # Pre-create keychain and import cert ourselves so electron-builder
-      # uses our keychain (via CSC_KEYCHAIN) rather than creating its own.
-      # electron-builder's own keychain creation fails on modern macOS runners
-      # with "SecKeychainUnlock: passphrase incorrect" on set-key-partition-list.
+      # Pre-create keychain and import cert so electron-builder uses ours
+      # (via CSC_KEYCHAIN) rather than creating its own. electron-builder's
+      # own keychain creation fails on modern macOS runners with
+      # "SecKeychainUnlock: passphrase incorrect" on set-key-partition-list.
       - name: Setup Signing Keychain
-        if: ${{ secrets.CSC_LINK != '' }}
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
         run: |
           if [ -z "$CSC_LINK" ]; then
-            echo "No CSC_LINK — skipping keychain setup."
+            echo "No CSC_LINK secret — skipping keychain setup."
             exit 0
           fi
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
@@ -71,35 +70,33 @@ jobs:
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Import cert — -A allows any application (codesign) to access without UI
-          echo "$CSC_LINK" | base64 --decode -o "$RUNNER_TEMP/cert.p12"
+          # Decode & import cert — -A: allow any app access without UI prompt
+          echo "$CSC_LINK" | base64 --decode > "$RUNNER_TEMP/cert.p12"
           security import "$RUNNER_TEMP/cert.p12" \
             -k "$KEYCHAIN_PATH" \
             -P "$CSC_KEY_PASSWORD" \
             -T /usr/bin/codesign -A
           rm -f "$RUNNER_TEMP/cert.p12"
 
-          # Unlock again after import (macOS may lock it)
+          # Unlock again after import (macOS may re-lock it)
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Allow codesign access without confirmation prompt
+          # Allow codesign to use the key without confirmation
           security set-key-partition-list \
             -S apple-tool:,apple:,codesign: \
             -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Add to search list
+          # Add to the user's keychain search list
           security list-keychain -d user -s "$KEYCHAIN_PATH" \
             $(security list-keychain -d user | tr -d '"')
 
           echo "Keychain ready at $KEYCHAIN_PATH"
 
-      # Use CSC_KEYCHAIN (our pre-created keychain) NOT CSC_LINK
-      # This tells electron-builder to use the already-imported cert
+      # CSC_KEYCHAIN tells electron-builder to use our pre-imported cert.
+      # Do NOT set CSC_LINK here — it would trigger electron-builder's own
+      # keychain creation which conflicts with ours.
       - name: Package DRMWrap Studio (macOS Universal)
         env:
-          # CSC_KEYCHAIN tells electron-builder to use our keychain
-          # Do NOT set CSC_LINK here — it would trigger electron-builder's
-          # own keychain creation which conflicts with ours
           CSC_KEYCHAIN: ${{ env.KEYCHAIN_PATH }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
