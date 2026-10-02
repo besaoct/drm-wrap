@@ -1,6 +1,6 @@
 {
   "name": "drm-wrap-studio",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "description": "DRMWrap — the desktop GUI for building DRM-Wrap desktop apps without a terminal.",
   "author": "besaoct",
