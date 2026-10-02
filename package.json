@@ -1,7 +1,7 @@
 {
   "name": "drm-wrap-monorepo",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "DRM-Wrap: npm CLI + secure Electron desktop app generator with anti-screen-capture and DRM features",
   "workspaces": [
     "packages/*"

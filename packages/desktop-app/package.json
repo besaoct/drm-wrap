@@ -1,6 +1,6 @@
 {
   "name": "drm-wrap-desktop-app",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "DRM-Wrap generated Electron desktop app template (also doubles as the monorepo's live dev/demo app).",
   "author": "besaoct",

@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. v1.0.0)'
+        description: 'Release version (e.g. v1.0.1)'
         required: true
-        default: 'v1.0.0'
+        default: 'v1.0.1'
 
 permissions:
   contents: write
@@ -20,10 +20,14 @@ permissions:
 # ---------------------------------------------------------------------------
 # CSC_LINK                    Base64-encoded Developer ID Application .p12 cert
 #                             Generate: base64 -i DeveloperID.p12 | pbcopy
-# CSC_KEY_PASSWORD            Password for the .p12 cert
+# CSC_KEY_PASSWORD            Password used when exporting the .p12 cert
 # APPLE_ID                    Apple ID email used for notarization
 # APPLE_APP_SPECIFIC_PASSWORD App-specific password from appleid.apple.com
 # APPLE_TEAM_ID               10-char Apple Team ID (e.g. 63LNPXAB49)
+#
+# NOTE: Do NOT manually import the cert into a keychain in the workflow.
+# electron-builder v24 reads CSC_LINK/CSC_KEY_PASSWORD directly and manages
+# its own temporary keychain — manual keychain steps cause conflicts.
 # ---------------------------------------------------------------------------
 
 jobs:
@@ -48,38 +52,8 @@ jobs:
       - name: Build Core Engine & Packages
         run: npm run build
 
-      # Import Developer ID Application cert into a temporary keychain
-      - name: Import Developer ID Certificate
-        env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-        run: |
-          if [ -z "$CSC_LINK" ]; then
-            echo "::warning::CSC_LINK secret not set — falling back to ad-hoc signing."
-            exit 0
-          fi
-          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
-          KEYCHAIN_PASS="$(openssl rand -hex 20)"
-          echo "KEYCHAIN_PASS=$KEYCHAIN_PASS" >> "$GITHUB_ENV"
-          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
-
-          security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
-          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
-
-          echo "$CSC_LINK" | base64 --decode > "$RUNNER_TEMP/cert.p12"
-          security import "$RUNNER_TEMP/cert.p12" \
-            -k "$KEYCHAIN_PATH" \
-            -P "$CSC_KEY_PASSWORD" \
-            -T /usr/bin/codesign \
-            -T /usr/bin/productsign \
-            -T /usr/bin/security
-          security set-key-partition-list \
-            -S apple-tool:,apple:,codesign: \
-            -s -k "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
-          rm -f "$RUNNER_TEMP/cert.p12"
-
+      # electron-builder reads CSC_LINK + CSC_KEY_PASSWORD directly and handles
+      # its own temp keychain. No manual security import needed.
       - name: Package DRMWrap Studio (macOS Universal)
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -125,13 +99,6 @@ jobs:
             OPTS="$OPTS -c.mac.notarize=false"
           fi
           npm run package --workspace=drm-wrap-desktop-app -- $OPTS
-
-      - name: Cleanup Keychain
-        if: always()
-        run: |
-          if [ -n "$KEYCHAIN_PATH" ]; then
-            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
-          fi
 
       - name: Collect macOS Artifacts
         run: |
