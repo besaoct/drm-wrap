@@ -4,12 +4,26 @@ import type { DrmConfig, FeatureFlags } from "./types";
 import { defaultConfig, validateConfig, saveConfig } from "./config/schema";
 
 /**
- * Resolves the desktop-app template directory. Prefers the copy bundled
- * into this package at build time (`templates/desktop-app`, see
- * scripts/copy-template.js), and falls back to the sibling workspace
- * package for monorepo-local development before that copy exists.
+ * Resolves the desktop-app template directory.
+ *
+ * Priority order:
+ *  1. `extraResources` path — when running as a packaged .app the template is
+ *     placed outside the ASAR via electron-builder's extraResources so that
+ *     fs.copy (which uses opendir) can traverse it. Electron does NOT patch
+ *     opendir for ASAR paths, causing ENOTDIR errors if we read from inside
+ *     the ASAR archive.
+ *  2. Monorepo-local `templates/desktop-app` — resolved at build time.
+ *  3. Sibling workspace package — monorepo dev fallback before the copy exists.
  */
 export function resolveTemplateDir(): string {
+  // When packaged, electron-builder places drm-wrap-templates/ as an extraResource
+  // next to the ASAR, so it can be read as a real directory by Node fs.copy.
+  if (process.resourcesPath) {
+    const extraRes = path.join(process.resourcesPath, "drm-wrap-templates", "desktop-app");
+    if (fs.existsSync(extraRes)) return extraRes;
+  }
+
+  // Development / monorepo build: template is copied next to the dist output.
   const bundled = path.join(__dirname, "..", "..", "templates", "desktop-app");
   if (fs.existsSync(bundled)) return bundled;
 
@@ -130,16 +144,44 @@ export interface ScaffoldResult {
  * electron-builder.yml to match appName. Does not touch licensing — callers
  * decide when/whether to gate this (see require-license.ts for the CLI).
  */
+/**
+ * ASAR-safe recursive directory copy. Electron patches fs.readdir and
+ * fs.readFile for ASAR paths but does NOT patch the opendir() syscall that
+ * fs-extra's copy() uses under the hood. This implementation only calls
+ * readdir + readFile, so it works whether src is inside an ASAR or on disk.
+ */
+async function copyDirAsarSafe(
+  src: string,
+  dest: string,
+  filter: (src: string) => boolean
+): Promise<void> {
+  const stat = await fs.stat(src);
+  if (stat.isDirectory()) {
+    await fs.ensureDir(dest);
+    const entries = await fs.readdir(src);
+    for (const entry of entries) {
+      const srcEntry = path.join(src, entry);
+      const destEntry = path.join(dest, entry);
+      if (!filter(srcEntry)) continue;
+      await copyDirAsarSafe(srcEntry, destEntry, filter);
+    }
+  } else {
+    await fs.ensureDir(path.dirname(dest));
+    const content = await fs.readFile(src);
+    await fs.writeFile(dest, content);
+  }
+}
+
 export async function scaffoldProject(options: ScaffoldOptions): Promise<ScaffoldResult> {
   const targetDir = path.resolve(options.targetDir);
   const templateDir = resolveTemplateDir();
 
   await fs.ensureDir(targetDir);
-  await fs.copy(templateDir, targetDir, {
-    filter: (src) => {
-      const base = path.basename(src);
-      return base !== "node_modules" && base !== "dist" && base !== "release";
-    },
+  // Use ASAR-safe copy so this works both in dev (real fs) and when DRMWrap
+  // is installed as a packaged .app (template resolved from extraResources).
+  await copyDirAsarSafe(templateDir, targetDir, (src) => {
+    const base = path.basename(src);
+    return base !== "node_modules" && base !== "dist" && base !== "release";
   });
 
   const config = validateConfig(
