@@ -1,6 +1,6 @@
 {
   "name": "@besaoct/drm-wrap",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Convert any website into a secure, DRM-protected Electron desktop app with anti-screen-capture and screen-recording detection.",
   "author": "besaoct",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "drm-wrap-studio",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
   "description": "DRMWrap — the desktop GUI for building DRM-Wrap desktop apps without a terminal.",
   "author": "besaoct",
@@ -12,11 +12,10 @@
   },
   "dependencies": {
     "@besaoct/drm-wrap": "^1.0.0",
-    "fs-extra": "^11.2.0"
-  },
-  "devDependencies": {
     "cross-env": "^7.0.3",
     "electron": "^31.3.0",
-    "electron-builder": "^24.13.3"
-  }
+    "electron-builder": "^24.13.3",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {}
 }

@@ -28,6 +28,13 @@ extraResources:
       - "!**/dist/**"
       - "!**/release/**"
 asar: true
+# Unpack ALL node_modules to app.asar.unpacked/node_modules/ so they are
+# real directories on disk. This is required for the vendor-copy (Install
+# Dependencies) to work: fs.copy() uses opendir() internally which Electron
+# does NOT patch for ASAR paths. With asarUnpack the source is real fs,
+# so fs.copy works normally and no system npm/node is needed.
+asarUnpack:
+  - "node_modules/**/*"
 mac:
   category: public.app-category.developer-tools
   icon: public/logo.icns
