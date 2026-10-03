@@ -1,12 +1,12 @@
 {
-  "name": "@besaoct/drm-wrap",
-  "version": "1.0.8",
+  "name": "@vecvel/drm-wrap",
+  "version": "1.0.9",
   "description": "Convert any website into a secure, DRM-protected Electron desktop app with anti-screen-capture and screen-recording detection.",
-  "author": "besaoct",
+  "author": "vecvel",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/besaoct/drm-wrap.git"
+    "url": "git+https://github.com/vecvel/drm-wrap.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

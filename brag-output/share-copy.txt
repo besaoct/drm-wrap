@@ -1,0 +1,3 @@
+Convert any website into a hardened, production-ready desktop app with anti-screen-capture, meeting screen-share cloaking, dynamic forensic watermarks, and offline Ed25519 licensing. Built with Electron & TypeScript. Zero backend alterations required.
+
+https://github.com/vecvel/drm-wrap

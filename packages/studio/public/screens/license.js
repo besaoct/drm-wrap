@@ -257,7 +257,7 @@
       '    </span>' +
       '  </div>' +
       '  <div class="home-meta-right">' +
-      '    <span class="meta-chip" style="font-size: 11px; opacity: 0.65;">DRMWrap Studio v1.0.8</span>' +
+      '    <span class="meta-chip" style="font-size: 11px; opacity: 0.65;">DRMWrap Studio v1.0.9</span>' +
       '  </div>' +
       '</div>';
 

@@ -247,12 +247,12 @@ jobs:
           merge-multiple: true
 
       - name: Pack npm package tarball
-        run: npm pack --workspace=@besaoct/drm-wrap --pack-destination release-dist
+        run: npm pack --workspace=@vecvel/drm-wrap --pack-destination release-dist
 
       - name: Publish npm package to GitHub Packages
         run: |
           npm config set //npm.pkg.github.com/:_authToken "${{ secrets.GITHUB_TOKEN }}"
-          npm publish --workspace=@besaoct/drm-wrap || echo "Package already published at this version."
+          npm publish --workspace=@vecvel/drm-wrap || echo "Package already published at this version."
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

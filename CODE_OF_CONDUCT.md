@@ -38,9 +38,9 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project lead at:
 
-* **Lead Maintainer:** besaoct
-* **Email:** blackipie@outlook.com
-* **GitHub:** [@besaoct](https://github.com/besaoct)
+* **Lead Maintainer:** vecvel
+* **Email:** support@vecvel.com
+* **GitHub:** [@vecvel](https://github.com/vecvel)
 
 All complaints will be reviewed and investigated promptly and fairly. All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 

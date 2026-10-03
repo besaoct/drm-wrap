@@ -19,8 +19,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run typecheck --workspace=@besaoct/drm-wrap
-      - run: npm run build --workspace=@besaoct/drm-wrap
+      - run: npm run typecheck --workspace=@vecvel/drm-wrap
+      - run: npm run build --workspace=@vecvel/drm-wrap
 
   # Produces real installers: .exe/.portable on Windows, .dmg/.zip on macOS,
   # each built natively on that OS (electron-builder needs Wine to cross-build
@@ -43,7 +43,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build --workspace=@besaoct/drm-wrap
+      - run: npm run build --workspace=@vecvel/drm-wrap
 
       - name: Package desktop app
         working-directory: packages/desktop-app
@@ -85,7 +85,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build --workspace=@besaoct/drm-wrap
+      - run: npm run build --workspace=@vecvel/drm-wrap
 
       - name: Package Studio
         working-directory: packages/studio

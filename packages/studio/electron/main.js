@@ -15,7 +15,7 @@ const {
   saveConfig,
   personalizeGeneratedProject,
   applyLogoToProject,
-} = require("@besaoct/drm-wrap/core");
+} = require("@vecvel/drm-wrap/core");
 
 let mainWindow = null;
 let runningProcess = null;

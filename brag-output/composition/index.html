@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>DRM-Wrap — Product Promo</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000000;
+        color: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        background: #000000;
+      }
+
+      /* Subtle monochrome grid pattern */
+      .grid-pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 60px 60px;
+        background-image: 
+          linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        pointer-events: none;
+      }
+
+      /* Persistent Top Bar - Stark Monochrome */
+      .top-brand-bar {
+        position: absolute;
+        top: 40px;
+        left: 72px;
+        right: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 100;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 20px;
+      }
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand-icon-mini {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        filter: grayscale(100%);
+      }
+      .brand-text-mini {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #ffffff;
+      }
+      .brand-tag-mini {
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: #141414;
+        color: #a1a1aa;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+      .top-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: #d4d4d8;
+        background: #0d0d0d;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px 12px;
+        border-radius: 4px;
+      }
+      .status-indicator {
+        color: #ffffff;
+        font-size: 10px;
+      }
+
+      /* Scene Container Base */
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 72px 60px;
+      }
+
+      /* Monochrome Tag Labels (No Pill Badges) */
+      .mono-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: monospace;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 6px 12px;
+        border-radius: 4px;
+        background: #111111;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e4e4e7;
+        margin-bottom: 20px;
+      }
+      .scene-title {
+        font-size: 60px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        text-align: center;
+        color: #ffffff;
+        margin-bottom: 18px;
+      }
+      .scene-title-subtle {
+        color: #a1a1aa;
+        font-weight: 500;
+      }
+      .scene-desc {
+        font-size: 22px;
+        color: #a1a1aa;
+        text-align: center;
+        max-width: 920px;
+        line-height: 1.5;
+        margin-bottom: 36px;
+      }
+
+      /* Window Frame Mockup - Soft Hairline Border, Zero Shadow */
+      .mac-window {
+        background: #0a0a0a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .mac-titlebar {
+        background: #141414;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .mac-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .mac-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        background: #2a2a2a;
+      }
+      .mac-title {
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: 500;
+        color: #a1a1aa;
+        margin: 0 auto;
+        letter-spacing: 0.02em;
+      }
+      .mac-content {
+        position: relative;
+        overflow: hidden;
+        background: #000000;
+      }
+      .mac-content img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      /* Scene 1 (Hook) Specifics */
+      #scene-1 .hook-logo-wrap {
+        margin-bottom: 28px;
+      }
+      #scene-1 .hook-logo-wrap img {
+        width: 110px;
+        height: 110px;
+        border-radius: 12px;
+        filter: grayscale(100%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .feature-row {
+        display: flex;
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .feature-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: monospace;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 10px 18px;
+        border-radius: 4px;
+        background: #111111;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
+
+      /* Scene 2 (Wizard) Layout */
+      #scene-2 .content-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 1380px;
+        align-items: center;
+        justify-content: center;
+      }
+      #scene-2 .mac-window {
+        width: 1380px;
+        height: 640px;
+      }
+      #scene-2 .mac-content {
+        height: 600px;
+      }
+      #scene-2 .mac-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+      }
+      .floating-tag {
+        position: absolute;
+        padding: 10px 16px;
+        border-radius: 4px;
+        background: #141414;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 10;
+      }
+      .tag-left {
+        bottom: 30px;
+        left: -24px;
+      }
+      .tag-right {
+        top: 50px;
+        right: -24px;
+      }
+
+      /* Scene 3 (Security Defense) Layout */
+      #scene-3 .dual-showcase {
+        display: flex;
+        gap: 36px;
+        width: 1600px;
+        height: 620px;
+        align-items: stretch;
+      }
+      .showcase-card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .showcase-card .mac-window {
+        height: 100%;
+      }
+      .showcase-card .mac-content {
+        height: 100%;
+      }
+      .showcase-card .mac-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+      }
+      .card-caption {
+        margin-top: 12px;
+        text-align: center;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: 500;
+        color: #a1a1aa;
+      }
+
+      /* Scene 4 (Build & Packaging) Layout */
+      #scene-4 .build-split {
+        display: flex;
+        gap: 36px;
+        width: 1600px;
+        height: 620px;
+        align-items: stretch;
+      }
+      #scene-4 .build-col-terminal {
+        flex: 1.15;
+      }
+      #scene-4 .build-col-crypto {
+        flex: 0.85;
+      }
+      #scene-4 .mac-window {
+        height: 100%;
+      }
+      #scene-4 .mac-content {
+        height: 100%;
+      }
+      #scene-4 .mac-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+      }
+
+      /* Scene 5 (Outro) Layout */
+      #scene-5 .outro-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      #scene-5 .outro-logo {
+        width: 130px;
+        height: 130px;
+        border-radius: 16px;
+        filter: grayscale(100%);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        margin-bottom: 24px;
+      }
+      #scene-5 .outro-title {
+        font-size: 72px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        margin-bottom: 8px;
+        color: #ffffff;
+      }
+      #scene-5 .outro-tagline {
+        font-size: 32px;
+        font-weight: 500;
+        color: #a1a1aa;
+        margin-bottom: 32px;
+      }
+      #scene-5 .repo-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #111111;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        padding: 14px 28px;
+        border-radius: 6px;
+      }
+      #scene-5 .repo-text {
+        font-family: monospace;
+        font-size: 22px;
+        font-weight: 600;
+        color: #ffffff;
+      }
+      .stack-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 26px;
+      }
+      .stack-box {
+        font-family: monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: #a1a1aa;
+        background: #0d0d0d;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 6px 14px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Background Audio & SFX -->
+      <audio id="bgm" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3" data-start="0" data-duration="20" data-volume="0.75" data-track-index="0"></audio>
+      <audio id="sfx-shield" src="assets/sfx/shield-hit.ogg" data-start="0.2" data-duration="0.15" data-volume="0.8" data-track-index="1"></audio>
+      <audio id="sfx-click" src="assets/sfx/click.ogg" data-start="8.7" data-duration="0.01" data-volume="0.6" data-track-index="2"></audio>
+      <audio id="sfx-switch" src="assets/sfx/switch.ogg" data-start="13.1" data-duration="0.2" data-volume="0.6" data-track-index="3"></audio>
+      <audio id="sfx-outro" src="assets/sfx/shield-hit.ogg" data-start="17.4" data-duration="0.15" data-volume="0.8" data-track-index="4"></audio>
+
+      <!-- Minimal Monochrome Grid Background -->
+      <div class="grid-pattern"></div>
+
+      <!-- Persistent Brand Header -->
+      <div class="top-brand-bar">
+        <div class="brand-lockup">
+          <img src="assets/logo-bar.png" alt="DRM-Wrap" class="brand-icon-mini" />
+          <span class="brand-text-mini">DRM-Wrap</span>
+          <span class="brand-tag-mini">STUDIO V1.0.9</span>
+        </div>
+        <div class="top-status">
+          <span class="status-indicator">■</span>
+          <span>HARDENED DESKTOP ENGINE</span>
+        </div>
+      </div>
+
+      <!-- SCENE 1: The Hook (0.00s - 3.20s) -->
+      <div class="scene" id="scene-1">
+        <div class="hook-logo-wrap" id="s1-logo">
+          <img src="assets/logo-hook.png" alt="DRM-Wrap Shield" />
+        </div>
+        <h1 class="scene-title" id="s1-title">Any website.<br /><span class="scene-title-subtle">Hardened into a native desktop app.</span></h1>
+        <p class="scene-desc" id="s1-desc">
+          Convert any web application into a hardened Electron desktop executable that blinds screen capture utilities and enforces offline cryptographic licensing.
+        </p>
+        <div class="feature-row" id="s1-features">
+          <div class="feature-box">ANTI-SCREEN CAPTURE</div>
+          <div class="feature-box">MEETING SCREEN CLOAK</div>
+          <div class="feature-box">ED25519 CRYPTOGRAPHY</div>
+        </div>
+      </div>
+
+      <!-- SCENE 2: The Studio Wizard (3.20s - 7.50s) -->
+      <div class="scene" id="scene-2">
+        <div class="mono-tag" id="s2-tag">DRM-WRAP STUDIO GUI</div>
+        <h2 class="scene-title" id="s2-title">Wrap in seconds. <span class="scene-title-subtle">Zero backend code.</span></h2>
+        <p class="scene-desc" id="s2-desc">Point to any live web URL or local project. Configure branding and protection modules without terminal commands.</p>
+        <div class="content-grid" id="s2-window-wrap">
+          <div style="position: relative;">
+            <div class="mac-window">
+              <div class="mac-titlebar">
+                <div class="mac-dots">
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                </div>
+                <div class="mac-title">DRMWrap — Create a new app</div>
+              </div>
+              <div class="mac-content">
+                <img src="assets/screenshots/04-wizard-setup.png" alt="DRMWrap Studio Wizard" />
+              </div>
+            </div>
+            <div class="floating-tag tag-left" id="s2-tag-1">
+              [ 1-CLICK APP SCAFFOLD ]
+            </div>
+            <div class="floating-tag tag-right" id="s2-tag-2">
+              [ CUSTOM BRANDING & ICON ]
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 3: Total Capture Defense (7.50s - 12.00s) -->
+      <div class="scene" id="scene-3">
+        <div class="mono-tag" id="s3-tag">DEFENSE IN DEPTH</div>
+        <h2 class="scene-title" id="s3-title">Total Capture Defense. <span class="scene-title-subtle">Blinds OBS & Meeting Shares.</span></h2>
+        <p class="scene-desc" id="s3-desc">Hardware-level OS content protection with dynamic forensic watermarks and active process inspection.</p>
+        <div class="dual-showcase" id="s3-showcase">
+          <div class="showcase-card" id="s3-card-left">
+            <div class="mac-window">
+              <div class="mac-titlebar">
+                <div class="mac-dots">
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                </div>
+                <div class="mac-title">Security Modules Toggles</div>
+              </div>
+              <div class="mac-content">
+                <img src="assets/screenshots/06-dashboard-settings.png" alt="Security Settings" />
+              </div>
+            </div>
+            <div class="card-caption">[ GRANULAR CONTROLS: OBS · SNIPPING · CLOAKING ]</div>
+          </div>
+          <div class="showcase-card" id="s3-card-right">
+            <div class="mac-window">
+              <div class="mac-titlebar">
+                <div class="mac-dots">
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                </div>
+                <div class="mac-title">DRMWrap — Project Hub</div>
+              </div>
+              <div class="mac-content">
+                <img src="assets/screenshots/02-home-dashboard.png" alt="Project Hub" />
+              </div>
+            </div>
+            <div class="card-caption">[ HARDENED PROJECT HUB: SCREEN STEALTH · DEVTOOLS GUARD ]</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 4: 1-Click Packaging & Cryptography (12.00s - 16.50s) -->
+      <div class="scene" id="scene-4">
+        <div class="mono-tag" id="s4-tag">PACKAGING & CRYPTOGRAPHY</div>
+        <h2 class="scene-title" id="s4-title">Build native installers. <span class="scene-title-subtle">Distribute securely.</span></h2>
+        <p class="scene-desc" id="s4-desc">Compiles macOS DMGs and Windows installers with embedded 100% offline Ed25519 asymmetric verification.</p>
+        <div class="build-split" id="s4-split">
+          <div class="build-col-terminal" id="s4-col-left">
+            <div class="mac-window">
+              <div class="mac-titlebar">
+                <div class="mac-dots">
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                </div>
+                <div class="mac-title">Build & Run Terminal — Release Installers</div>
+              </div>
+              <div class="mac-content">
+                <img src="assets/screenshots/05-dashboard-build.png" alt="Build Terminal" />
+              </div>
+            </div>
+          </div>
+          <div class="build-col-crypto" id="s4-col-right">
+            <div class="mac-window">
+              <div class="mac-titlebar">
+                <div class="mac-dots">
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                  <div class="mac-dot"></div>
+                </div>
+                <div class="mac-title">Ed25519 WebCrypto License Authority</div>
+              </div>
+              <div class="mac-content">
+                <img src="assets/screenshots/08-license-generator-result.png" alt="License Authority" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 5: Outro & Call to Action (16.50s - 20.00s) -->
+      <div class="scene" id="scene-5">
+        <div class="outro-wrap">
+          <img src="assets/logo-outro.png" alt="DRM-Wrap Logo" class="outro-logo" id="s5-logo" />
+          <h2 class="outro-title" id="s5-title">DRM-Wrap</h2>
+          <p class="outro-tagline" id="s5-tagline">Any website. Wrapped, watched, protected.</p>
+          <div class="repo-box" id="s5-repo">
+            <span class="repo-text">github.com/vecvel/drm-wrap</span>
+          </div>
+          <div class="stack-row" id="s5-stack">
+            <div class="stack-box">ELECTRON 31+</div>
+            <div class="stack-box">TYPESCRIPT 5.5</div>
+            <div class="stack-box">ED25519 CRYPTOGRAPHY</div>
+            <div class="stack-box">MACOS & WINDOWS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GSAP Master Animation Timeline -->
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Initial visual states for all scenes
+      gsap.set(["#scene-1", "#scene-2", "#scene-3", "#scene-4", "#scene-5"], {
+        opacity: 0,
+        pointerEvents: "none"
+      });
+
+      // ==========================================
+      // SCENE 1: The Hook (0.00s - 3.20s)
+      // ==========================================
+      tl.to("#scene-1", { opacity: 1, duration: 0.35, ease: "power2.out" }, 0.0);
+      tl.fromTo("#s1-logo", 
+        { scale: 0.8, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        0.15
+      );
+      tl.fromTo("#s1-title", 
+        { y: 24, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        0.40
+      );
+      tl.fromTo("#s1-desc", 
+        { y: 16, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 
+        0.70
+      );
+      tl.fromTo("#s1-features", 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 
+        0.95
+      );
+      // Exit Scene 1
+      tl.to("#scene-1", { opacity: 0, duration: 0.35, ease: "power2.in" }, 2.85);
+
+      // ==========================================
+      // SCENE 2: The Studio Wizard (3.20s - 7.50s)
+      // ==========================================
+      tl.to("#scene-2", { opacity: 1, duration: 0.35, ease: "power2.out" }, 3.20);
+      tl.fromTo("#s2-tag", 
+        { y: -12, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        3.25
+      );
+      tl.fromTo("#s2-title", 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 
+        3.40
+      );
+      tl.fromTo("#s2-desc", 
+        { y: 16, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        3.60
+      );
+      tl.fromTo("#s2-window-wrap", 
+        { y: 36, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 
+        3.80
+      );
+      tl.fromTo("#s2-tag-1", 
+        { x: -24, opacity: 0 }, 
+        { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 
+        4.30
+      );
+      tl.fromTo("#s2-tag-2", 
+        { x: 24, opacity: 0 }, 
+        { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 
+        4.60
+      );
+      // Exit Scene 2
+      tl.to("#scene-2", { opacity: 0, duration: 0.35, ease: "power2.in" }, 7.15);
+
+      // ==========================================
+      // SCENE 3: Total Capture Defense (7.50s - 12.00s)
+      // Beat-locked near 8.74s
+      // ==========================================
+      tl.to("#scene-3", { opacity: 1, duration: 0.35, ease: "power2.out" }, 7.50);
+      tl.fromTo("#s3-tag", 
+        { y: -12, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        7.55
+      );
+      tl.fromTo("#s3-title", 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 
+        7.70
+      );
+      tl.fromTo("#s3-desc", 
+        { y: 16, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        7.90
+      );
+      // Beat lock: 8.74s
+      tl.fromTo("#s3-card-left", 
+        { x: -30, opacity: 0 }, 
+        { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        8.20
+      );
+      tl.fromTo("#s3-card-right", 
+        { x: 30, opacity: 0 }, 
+        { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        8.60 // beat-locked: ~8.74s
+      );
+      // Exit Scene 3
+      tl.to("#scene-3", { opacity: 0, duration: 0.35, ease: "power2.in" }, 11.65);
+
+      // ==========================================
+      // SCENE 4: 1-Click Packaging & Cryptography (12.00s - 16.50s)
+      // Beat-locked near 13.11s
+      // ==========================================
+      tl.to("#scene-4", { opacity: 1, duration: 0.35, ease: "power2.out" }, 12.00);
+      tl.fromTo("#s4-tag", 
+        { y: -12, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        12.05
+      );
+      tl.fromTo("#s4-title", 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 
+        12.20
+      );
+      tl.fromTo("#s4-desc", 
+        { y: 16, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        12.40
+      );
+      // Beat lock: 13.11s
+      tl.fromTo("#s4-col-left", 
+        { y: 30, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        12.70
+      );
+      tl.fromTo("#s4-col-right", 
+        { y: 30, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        13.10 // beat-locked: 13.11s
+      );
+      // Exit Scene 4
+      tl.to("#scene-4", { opacity: 0, duration: 0.35, ease: "power2.in" }, 16.15);
+
+      // ==========================================
+      // SCENE 5: Outro & Call to Action (16.50s - 20.00s)
+      // Beat-locked near 17.47s
+      // ==========================================
+      tl.to("#scene-5", { opacity: 1, duration: 0.4, ease: "power2.out" }, 16.50);
+      tl.fromTo("#s5-logo", 
+        { scale: 0.85, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 
+        16.80
+      );
+      tl.fromTo("#s5-title", 
+        { y: 20, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 
+        17.30 // beat-locked: ~17.47s
+      );
+      tl.fromTo("#s5-tagline", 
+        { y: 16, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 
+        17.65
+      );
+      tl.fromTo("#s5-repo", 
+        { scale: 0.95, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 0.45, ease: "power3.out" }, 
+        18.05
+      );
+      tl.fromTo("#s5-stack", 
+        { y: 12, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
+        18.40
+      );
+
+      // Register master timeline with Hyperframes
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

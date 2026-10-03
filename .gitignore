@@ -8,6 +8,11 @@ out/
 .env
 .env.local
 
+
+# brag-output
+skills-lock.json
+.agents
+
 # electron-builder output
 packages/desktop-app/release/
 packages/*/release/

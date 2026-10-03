@@ -2,14 +2,14 @@
 
 > Convert any existing website (Laravel, React, Next.js, Vue, Nuxt, CodeIgniter, WordPress, or plain HTML) into a hardened, production-ready Electron desktop app with anti-screen-capture, meeting screen-share cloaking, dynamic forensic watermarks, and offline cryptographic Ed25519 licensing.
 
-[![Author](https://img.shields.io/badge/Author-besaoct-blue.svg)](https://github.com/besaoct)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-success.svg)](https://github.com/besaoct/drm-wrap/releases)
-[![License](https://img.shields.io/badge/License-Proprietary%20%40besaoct-red.svg)](LICENSE)
-[![GitHub Pages](https://img.shields.io/badge/Web%20License%20Generator-Live-06b6d4?logo=githubpages&logoColor=white)](https://besaoct.github.io/drm-wrap/)
+[![Author](https://img.shields.io/badge/Author-vecvel-blue.svg)](https://github.com/vecvel)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-success.svg)](https://github.com/vecvel/drm-wrap/releases)
+[![License](https://img.shields.io/badge/License-Proprietary%20%40vecvel-red.svg)](LICENSE)
+[![GitHub Pages](https://img.shields.io/badge/Web%20License%20Generator-Live-06b6d4?logo=githubpages&logoColor=white)](https://vecvel.github.io/drm-wrap/)
 [![Electron](https://img.shields.io/badge/Desktop-Electron%2031%2B-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Cryptography](https://img.shields.io/badge/Cryptography-Ed25519-7C3AED)](https://github.com/besaoct/drm-wrap)
+[![Cryptography](https://img.shields.io/badge/Cryptography-Ed25519-7C3AED)](https://github.com/vecvel/drm-wrap)
 
 ---
 
@@ -88,13 +88,13 @@ drm-wrap/
 ├── tools/
 │   └── license-generator.html        # Standalone Web GUI License Authority (WebCrypto Ed25519)
 ├── index.html                        # GitHub Pages root entrypoint (auto-redirect to tools generator)
-├── LICENSE                           # Proprietary Commercial Software License @besaoct
+├── LICENSE                           # Proprietary Commercial Software License @vecvel
 └── CODE_OF_CONDUCT.md                # Contributor Code of Conduct
 ```
 
 | Package / Module | Role | Publishing Target |
 |---|---|---|
-| **[`packages/lib`](./packages/lib)** | Core detection engine, CLI commands, and scaffold generator. | Published (`@besaoct/drm-wrap` on GitHub Packages) |
+| **[`packages/lib`](./packages/lib)** | Core detection engine, CLI commands, and scaffold generator. | Published (`@vecvel/drm-wrap` on GitHub Packages) |
 | **[`packages/desktop-app`](./packages/desktop-app)** | Production Electron shell injected with DRM listeners and preload bridges. | Bundled into scaffolded builds |
 | **[`packages/studio`](./packages/studio)** | **DRMWrap**: Complete GUI desktop application for building apps without terminal commands. | Desktop Installer (`.dmg`, `.exe`) |
 | **[`packages/license-admin`](./packages/license-admin)** | Keypair creation and command-line license issuing scripts. | Internal (Never Published) |
@@ -126,7 +126,7 @@ drm-wrap/
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/besaoct/drm-wrap.git
+git clone https://github.com/vecvel/drm-wrap.git
 cd drm-wrap
 
 # 2. Install workspace dependencies
@@ -150,19 +150,19 @@ Once published or linked, users can wrap any website in 5 simple commands:
 
 ```bash
 # 1. Initialize a new wrapped desktop project
-npx @besaoct/drm-wrap init
+npx @vecvel/drm-wrap init
 
 # 2. Customize protections (Anti-screenshot, Watermark, Recorder detection)
-npx @besaoct/drm-wrap config
+npx @vecvel/drm-wrap config
 
 # 3. Test and preview in live Electron development mode
-npx @besaoct/drm-wrap dev
+npx @vecvel/drm-wrap dev
 
 # 4. Activate your commercial license key
-npx @besaoct/drm-wrap license activate <YOUR_TOKEN_STRING>
+npx @vecvel/drm-wrap license activate <YOUR_TOKEN_STRING>
 
 # 5. Build production installers (.exe for Windows, .dmg for macOS)
-npx @besaoct/drm-wrap build
+npx @vecvel/drm-wrap build
 ```
 
 ---
@@ -184,7 +184,7 @@ The signature covers the exact ASCII bytes of the `base64url(JSON_payload)` stri
 ### 🌐 Option A: Web GUI Generator (Standalone & GitHub Pages)
 
 Access the live browser-based generator:
-👉 **[Open Live License Generator on GitHub Pages](https://besaoct.github.io/drm-wrap/)**
+👉 **[Open Live License Generator on GitHub Pages](https://vecvel.github.io/drm-wrap/)**
 
 Or open [`tools/license-generator.html`](./tools/license-generator.html) locally in any browser:
 - Built with modern **W3C WebCrypto API** (`SubtleCrypto` Ed25519).
@@ -300,11 +300,11 @@ DRM-Wrap significantly raises the barrier against unauthorized capture and redis
 
 ## 📜 License & Code of Conduct
 
-- **License**: Proprietary Commercial License &copy; 2026 **besaoct**. All Rights Reserved. See [LICENSE](LICENSE) for terms.
+- **License**: Proprietary Commercial License &copy; 2026 **vecvel**. All Rights Reserved. See [LICENSE](LICENSE) for terms.
 - **Code of Conduct**: See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines and reporting procedures.
 
 ---
 
 <p align="center">
-  Maintained with ❤️ by <a href="https://github.com/besaoct">@besaoct</a>
+  Maintained with ❤️ by <a href="https://github.com/vecvel">@vecvel</a>
 </p>
