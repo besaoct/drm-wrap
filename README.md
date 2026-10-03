@@ -3,7 +3,7 @@
 > Convert any existing website (Laravel, React, Next.js, Vue, Nuxt, CodeIgniter, WordPress, or plain HTML) into a hardened, production-ready Electron desktop app with anti-screen-capture, meeting screen-share cloaking, dynamic forensic watermarks, and offline cryptographic Ed25519 licensing.
 
 [![Author](https://img.shields.io/badge/Author-vecvel-blue.svg)](https://github.com/vecvel)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-success.svg)](https://github.com/vecvel/drm-wrap/releases)
+[![Release](https://img.shields.io/badge/Release-latest-success.svg)](https://github.com/vecvel/drm-wrap/releases/latest)
 [![License](https://img.shields.io/badge/License-Proprietary%20%40vecvel-red.svg)](LICENSE)
 [![GitHub Pages](https://img.shields.io/badge/Web%20License%20Generator-Live-06b6d4?logo=githubpages&logoColor=white)](https://vecvel.github.io/drm-wrap/)
 [![Electron](https://img.shields.io/badge/Desktop-Electron%2031%2B-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
