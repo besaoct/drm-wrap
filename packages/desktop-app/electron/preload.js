@@ -3,7 +3,7 @@
 // a minimal, read-mostly bridge under `window.__DRM_WRAP__` and nothing else
 // (SDD 4.3 / 7.3: preload exposes the smallest possible safe API surface).
 const { contextBridge, ipcRenderer } = require("electron");
-const { IPC_CHANNELS } = require("@vecvel/drm-wrap/core");
+const { IPC_CHANNELS } = require("./ipc-channels");
 
 function subscribe(channel, callback) {
   const listener = (_event, payload) => callback(payload);
