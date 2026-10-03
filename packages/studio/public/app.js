@@ -103,8 +103,19 @@
   let toastTimer = null;
 
   function notify(message, type) {
-    toastEl.textContent = message;
+    const isError = type === "error";
+    const badge = document.createElement("span");
+    badge.className = "toast-badge";
+    badge.textContent = isError ? "✕" : "✓";
+
+    const text = document.createElement("span");
+    text.textContent = message;
+
+    toastEl.innerHTML = "";
+    toastEl.appendChild(badge);
+    toastEl.appendChild(text);
     toastEl.className = "toast " + (type || "success");
+
     requestAnimationFrame(() => toastEl.classList.remove("hidden"));
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.add("hidden"), 3500);
@@ -123,6 +134,14 @@
       }
     }
     currentCleanup = null;
+
+    document.body.dataset.screen = name;
+    const titlebarEl = document.getElementById("titlebar");
+    if (titlebarEl) {
+      const showHeader = name === "home" || name === "license";
+      titlebarEl.style.display = showHeader ? "flex" : "none";
+      titlebarEl.classList.toggle("hidden", !showHeader);
+    }
 
     root.innerHTML = "";
     const render = screens[name];

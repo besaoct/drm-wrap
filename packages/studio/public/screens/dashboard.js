@@ -42,13 +42,24 @@
     screen.className = "screen wide";
     container.appendChild(screen);
 
-    const backLink = document.createElement("div");
+    const nav = document.createElement("div");
+    nav.className = "screen-nav";
+
+    const backLink = document.createElement("button");
+    backLink.type = "button";
     backLink.className = "back-link";
-    backLink.textContent = "← All projects";
+    backLink.id = "dashboard-back";
+    backLink.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+      '  <line x1="19" y1="12" x2="5" y2="12"></line>' +
+      '  <polyline points="12 19 5 12 12 5"></polyline>' +
+      '</svg>' +
+      '<span>All projects</span>';
     backLink.addEventListener("click", function () {
       ctx.goTo("home");
     });
-    screen.appendChild(backLink);
+    nav.appendChild(backLink);
+    screen.appendChild(nav);
 
     const header = document.createElement("div");
     header.className = "screen-header";
