@@ -13,6 +13,18 @@
 
 ---
 
+<p align="center">
+  <video src="https://github.com/vecvel/drm-wrap/raw/main/brag-output/brag.mp4" poster="brag-output/brag.jpg" controls width="100%" style="max-width: 900px;">
+    <a href="https://github.com/vecvel/drm-wrap/raw/main/brag-output/brag.mp4">
+      <img src="brag-output/brag.jpg" alt="DRM-Wrap Promo Video" width="100%" />
+    </a>
+  </video>
+  <br />
+  <sub>🎬 <em>Watch DRM-Wrap in action: anti-capture, invisible meeting screen-share cloaking, and offline Ed25519 licensing.</em> (<a href="brag-output/brag.mp4">Watch MP4</a>)</sub>
+</p>
+
+---
+
 ## 🌟 Overview
 
 **DRM-Wrap** is an enterprise-grade CLI and GUI engine that packages web applications into native Windows (`.exe`) and macOS (`.dmg`) desktop installers while enforcing client-side digital rights management (DRM).
